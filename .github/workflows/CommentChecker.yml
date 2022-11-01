@@ -8,11 +8,14 @@ jobs:
   comment-exists:
     runs-on: ubuntu-latest
     steps:
+      - name: Start comment checks
+        run: echo "Start checking comments"
+    
       - name: Comment is com
         if: ${{ github.event.pull_request.body == 'com' }}
         run: echo "com in body."
 
       - name: Comment is empty
-        if: ${{ github.event.pull_request.body == '' }}
+        if: ${{ github.event.pull_request.body == null }}
         run: echo "Comment is empty"
         
