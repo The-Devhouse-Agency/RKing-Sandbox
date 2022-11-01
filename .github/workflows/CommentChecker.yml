@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Comment is com
-        if: ${{ github.event.pull_request.body == "com" }}
+        if: ${{ github.event.pull_request.body == 'com' }}
         run: echo "com in body."
 
       - name: Comment is empty
-        if: ${{ github.event.pull_request.body == "" }}
+        if: ${{ github.event.pull_request.body == '' }}
         run: echo "Comment is empty"
