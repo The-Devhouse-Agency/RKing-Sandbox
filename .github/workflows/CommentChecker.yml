@@ -7,7 +7,7 @@ on:
 jobs:
   comment-exists:
     runs-on: ubuntu-latest
-    if: ${{ github.event.opened }}
+    #if: ${{ github.event.opened }}
     steps:
       - name: Is opened event
         run: echo "PR opened."
