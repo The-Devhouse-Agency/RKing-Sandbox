@@ -7,7 +7,11 @@ on:
 jobs:
   comment-exists:
     runs-on: ubuntu-latest
-    #if: ${{ github.event.opened }}
     steps:
-      - name: Is opened event
-        run: echo "PR opened."
+      - name: Comment is com
+        if: ${{ github.event.pull_request.body == "com" }}
+        run: echo "com in body."
+
+      - name: Comment is empty
+        if: ${{ github.event.pull_request.body == "" }}
+        run: echo "Comment is empty"
