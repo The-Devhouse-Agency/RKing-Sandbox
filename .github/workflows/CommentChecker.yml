@@ -19,3 +19,7 @@ jobs:
         if: ${{ github.event.pull_request.body == null }}
         run: echo "Comment is empty"
              exit 1
+
+      - name: Check length
+        run: echo ${{ github.event.pull_request.body.length }}
+        
