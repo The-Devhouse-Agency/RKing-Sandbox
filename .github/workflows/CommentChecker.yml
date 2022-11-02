@@ -1,25 +1,14 @@
-name: Comment Exists
+name: Comment Checker
 
 on:
   pull_request:
     types: [opened, reopened, edited]
 
 jobs:
-  comment-exists:
+  comment-empty:
     runs-on: ubuntu-latest
     steps:
-      - name: Start comment checks
-        run: echo "Start checking comments"
-        
-      - name: Comment is com
-        if: ${{ github.event.pull_request.body == 'com' }}
-        run: echo "com in body."
-
-      - name: Comment is empty
-        if: ${{ github.event.pull_request.body == null }}
-        run: echo "Comment is empty"
-             exit 1
-
-      - name: Check length
-        run: echo ${{ (github.event.pull_request.body).length }}
+      - name: Is comment empty
+        run: echo "Is comment empty?"
+             exit ${{ github.event.pull_request.body == null }}
         
