@@ -5,10 +5,15 @@ on:
     types: [opened, reopened, edited]
 
 jobs:
-  comment-empty:
+  is-comment-empty:
     runs-on: ubuntu-latest
     steps:
-      - name: Is comment empty
-        run: echo "Is comment empty?"
-             exit ${{ github.event.pull_request.body == null }}
+      - name: Lucky number
+        if: ${{ github.event.pull_request.body.indexOf(''LuckyNumber'') >= 0 }}
+        run: echo "Contains LuckyNumber"
+    
+      - name: Is comment empty?
+        if: ${{ github.event.pull_request.body == null }}
+        run: echo "Comment is empty."
+             exit 1
         
