@@ -8,9 +8,9 @@ jobs:
   is-comment-empty:
     runs-on: ubuntu-latest
     steps:
-      - name: Lucky number
-        if: ${{ github.event.pull_request.body.indexOf('LuckyNumber') >= 0 }}
-        run: echo "Contains LuckyNumber"
+#      - name: Lucky number
+#        if: ${{ github.event.pull_request.body.indexOf('LuckyNumber') >= 0 }}
+#        run: echo "Contains LuckyNumber"
     
       - name: Is comment empty?
         if: ${{ github.event.pull_request.body == null }}
