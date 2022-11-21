@@ -19,5 +19,6 @@ jobs:
 #        run: echo "Comment is empty."
 #             exit 1
         run: |
-          echo "Comment is empty."
-          (exit 1)
+          core.setFailed('Comment is empty.')
+#          echo "Comment is empty."
+#          (exit 1)
