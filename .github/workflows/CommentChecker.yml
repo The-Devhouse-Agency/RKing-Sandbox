@@ -16,6 +16,8 @@ jobs:
     
       - name: Is comment empty?
         if: ${{ github.event.pull_request.body == null }}
-        run: echo "Comment is empty."
-           exit 1
-           
+#        run: echo "Comment is empty."
+#             exit 1
+        run: |
+          echo "::error title=Foo::Bar"
+          (exit 1)
