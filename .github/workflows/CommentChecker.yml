@@ -15,10 +15,11 @@ jobs:
 #        run: echo "Contains LuckyNumber"
     
       - name: Is comment empty?
+        uses: actions/github-script@v3
         if: ${{ github.event.pull_request.body == null }}
 #        run: echo "Comment is empty."
 #             exit 1
-        run: |
+        with: |
           core.setFailed('Comment is empty.')
 #          echo "Comment is empty."
 #          (exit 1)
