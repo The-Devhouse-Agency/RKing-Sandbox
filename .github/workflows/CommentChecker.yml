@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Is comment empty?
-#        uses: actions/github-script@v6
+        uses: actions/github-script@v6
         if: ${{ github.event.pull_request.body == null }}
         with: |
               run: echo 'Comment is empty.'
