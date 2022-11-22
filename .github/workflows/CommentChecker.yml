@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Is comment empty?
-        uses: actions/github-script@v6
+#        uses: actions/github-script@v6
+        if: ${{ github.event.pull_request.body == null }}
         with: |
-          if( github.event.pull_request.body == null ) {
-              echo 'Comment is empty.'
+              run: echo 'Comment is empty.'
               exit 1
-          }
+#          }
 #              core.setFailed('Comment is empty.')
 #        run: echo "Comment is empty."
 #             exit 1
