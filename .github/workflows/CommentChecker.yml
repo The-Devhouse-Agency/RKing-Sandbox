@@ -18,7 +18,9 @@ jobs:
         uses: actions/github-script@v3
         with: |
           if( github.event.pull_request.body == null ) {
-              core.setFailed('Comment is empty.')
+              echo "Comment is empty."
+              exit 1
+#              core.setFailed('Comment is empty.')
           }
 #        run: echo "Comment is empty."
 #             exit 1
