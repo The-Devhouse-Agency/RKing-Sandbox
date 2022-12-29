@@ -13,7 +13,7 @@ jobs:
       id: read
       uses: actions/read-file@v2
       with:
-        path: "*.cs"
+        path: "**/*.cs"
     - name: Add user name
       if: !contains(steps.read.output, 'Created by')
       uses: actions/edit-file@v2
