@@ -1,0 +1,34 @@
+name: Add user name
+
+on:
+  create:
+    paths:
+      - "*.cs"
+  push:
+    paths:
+      - "*.cs"
+
+jobs:
+  add-user-name:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Read file
+      id: read
+      uses: actions/read-file@v2
+      with:
+        path: "*.cs"
+    - name: Add user name
+      if: !contains(steps.read.output, 'Created by:')
+      uses: actions/edit-file@v2
+      with:
+        path: "*.cs"
+        insert: |
+          // Created by: ${{ github.actor }}
+    - name: Add user name
+      if: contains(steps.read.output, 'Created by:') && !contains(steps.read.output, 'Edited by: ${{ github.actor }}')
+      uses: actions/edit-file@v2
+      with:
+        path: "*.cs"
+        insert: |
+          // Edited by: ${{ github.actor }}
