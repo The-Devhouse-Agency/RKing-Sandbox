@@ -1,0 +1,21 @@
+name: AutoVersion
+on: [push, pull request]
+
+jobs:
+  version_number:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get version number
+      run: |
+        cd $GITHUB_WORKSPACE
+        version_number=$(grep -oP 'Bundle Version: \K(\d+\.){2}\d+' ProjectSettings/ProjectSettings.asset)
+        echo ::set-output name=version::$version_number
+
+#    - name: Save version number
+#      run: |
+#        echo $version > version.txt
+#        git config --local user.email "action@github.com"
+#        git config --local user.name "GitHub Action"
+#        git add version.txt
+#        git commit -m "Update version number"
