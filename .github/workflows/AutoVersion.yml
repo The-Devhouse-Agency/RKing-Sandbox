@@ -1,5 +1,5 @@
 name: AutoVersion
-on: [push, pull request]
+on: [push, pull_request]
 
 jobs:
   version_number:
