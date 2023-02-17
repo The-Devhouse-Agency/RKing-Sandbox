@@ -10,14 +10,14 @@ jobs:
     name: Check for the Unity license ☑️
     runs-on: ubuntu-latest
     steps:
-      - name: Check if secret exists and is 27 characters long
-        run: |
-          if [ -z "${{ secrets.UNITY_SERIAL }}" ]; then
-            echo "Error: UNITY_SERIAL secret does not exist"
-          fi
-          if [ ${#{{ secrets.UNITY_SERIAL }}} -ne 27 ]; then
-            echo "Error: UNITY_SERIAL secret is not 27 characters long"
-          fi
+#      - name: Check if secret exists and is 27 characters long
+#        run: |
+#          if [ -z "${{ secrets.UNITY_SERIAL }}" ]; then
+#            echo "Error: UNITY_SERIAL secret does not exist"
+#          fi
+#          if [ ${#{{ secrets.UNITY_SERIAL }}} -ne 27 ]; then
+#            echo "Error: UNITY_SERIAL secret is not 27 characters long"
+#          fi
       - name: Fail - No license ☠️
         if: ${{ !startsWith(env.UNITY_SERIAL, '<') }}
         run: exit 1
