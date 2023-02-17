@@ -19,7 +19,7 @@ jobs:
 #            echo "Error: UNITY_SERIAL secret is not 27 characters long"
 #          fi
       - name: Fail - No license ☠️
-        if: ${{ !startsWith(env.UNITY_SERIAL, '<') }}
+        if: ${{ !startsWith(env.UNITY_SERIAL, 'S') }}
         run: exit 1
 
 #  testRunner:
