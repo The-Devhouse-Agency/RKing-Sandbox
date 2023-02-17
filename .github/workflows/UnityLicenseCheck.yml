@@ -3,7 +3,7 @@ name: GameCI Template 🎮
 on: push
 
 env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
 
 jobs:
   checkLicense:
@@ -19,7 +19,7 @@ jobs:
             echo "Error: UNITY_SERIAL secret is not 27 characters long"
           fi
       - name: Fail - No license ☠️
-        if: ${{ !startsWith(env.UNITY_LICENSE, '<') }}
+        if: ${{ !startsWith(env.UNITY_SERIAL, '<') }}
         run: exit 1
 
 #  testRunner:
