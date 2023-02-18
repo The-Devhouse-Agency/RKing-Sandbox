@@ -11,8 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fail - License value not long enough
-        if: ${{ length(env.UNITY_SERIAL) != 27 }}
-        run: echo ${{ len(env.UNITY_SERIAL) }}
+        run: |
+          const myString = process.env.UNITY_SERIAL;
+          if (myString.length === 27) {
+            console.log("The string is 27 characters long");
+          } else {
+            console.log("The string is not 27 characters long");
+          }
       - name: Fail - No license ☠️
         if: ${{ !startsWith(env.UNITY_SERIAL, 'S') }}
         run: exit 1
