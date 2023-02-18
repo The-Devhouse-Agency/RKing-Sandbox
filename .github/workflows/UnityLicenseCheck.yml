@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fail - License value not long enough
-        if: ${{ len(env.UNITY_SERIAL) != 27 }}
+        if: ${{ length(env.UNITY_SERIAL) != 27 }}
         run: echo ${{ len(env.UNITY_SERIAL) }}
       - name: Fail - No license ☠️
         if: ${{ !startsWith(env.UNITY_SERIAL, 'S') }}
