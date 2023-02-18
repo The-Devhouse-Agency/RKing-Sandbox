@@ -12,12 +12,13 @@ jobs:
     steps:
       - name: Fail - License value not long enough
         run: |
-          const myString = process.env.UNITY_SERIAL;
-          if (myString.length === 27) {
-            console.log("The string is 27 characters long");
-          } else {
-            console.log("The string is not 27 characters long");
-          }
+          my_string="${{ env.UNITY_SERIAL }}"
+          if [ ${#my_string} -eq 27 ]
+          then
+            echo "The string is 27 characters long"
+          else
+            echo "The string is not 27 characters long"
+          fi
       - name: Fail - No license ☠️
         if: ${{ !startsWith(env.UNITY_SERIAL, 'S') }}
         run: exit 1
