@@ -3,25 +3,39 @@ name: GameCI Template 🎮
 on: push
 
 env:
-  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
   checkLicense:
     name: Check for the Unity license ☑️
     runs-on: ubuntu-latest
     steps:
-      - name: Fail - License value not long enough
-        run: |
-          my_string="${{ env.UNITY_SERIAL }}"
-          if [ ${#my_string} -eq 27 ]
-          then
-            echo "The string is 27 characters long"
-          else
-            echo "The string is not 27 characters long"
-          fi
       - name: Fail - No license ☠️
-        if: ${{ !startsWith(env.UNITY_SERIAL, 'S') }}
+        if: ${{ !startsWith(env.UNITY_LICENSE, '<') }}
         run: exit 1
+
+#on: push
+
+#env:
+#  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+#
+#jobs:
+#  checkLicense:
+#    name: Check for the Unity license ☑️
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Fail - License value not long enough
+#        run: |
+#          my_string="${{ env.UNITY_SERIAL }}"
+#          if [ ${#my_string} -eq 27 ]
+#          then
+#            echo "The string is 27 characters long"
+#          else
+#            echo "The string is not 27 characters long"
+#          fi
+#      - name: Fail - No license ☠️
+#        if: ${{ !startsWith(env.UNITY_SERIAL, 'S') }}
+#        run: exit 1
 
 #  testRunner:
 #    needs: checkLicense
