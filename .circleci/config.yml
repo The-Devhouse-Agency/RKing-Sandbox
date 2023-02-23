@@ -4,6 +4,10 @@ orbs:
 workflows:
   test-build-with-executors:
     jobs:
+      - save_cache:
+            key: dependency-cache-{{ checksum "Packages/packages-lock.json" }}
+            paths:
+              - Library
 #      - checkout
 #      - unity/test:
 #          context: unity
