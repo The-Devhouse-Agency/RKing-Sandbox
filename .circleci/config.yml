@@ -13,7 +13,7 @@ workflows:
 #            size: large
 #            target_platform: windows-il2cpp
 #          name: test-windows
-#          project-path: RKing-Sandbox/src
+#          project-path: RKing-Sandbox
 #          step-name: Check if the tests run and results are uploaded
 #          test-platform: playmode
 #          unity-password-var-name: UNITY_PASSWORD
@@ -27,7 +27,7 @@ workflows:
             editor_version: 2021.3.11f1
             name: unity/windows-2019
             size: large
-            target_platform: windows-il2cpp
+            target_platform: StandaloneWindows64
           name: build-Windows64-il2cpp
           project-path: RKing-Sandbox/src
 #          requires:
