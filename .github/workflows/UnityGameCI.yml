@@ -104,42 +104,9 @@ jobs:
           name: Build-${{ matrix.targetPlatform }}
           path: build
 
-  #Remove extra if condition to enable
-  buildWithMac:
-    needs: [checklicense]
-    if: ${{ needs.checklicense.outputs.is_unity_license_set == 'true' && false }}
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        targetPlatform:
-          - StandaloneOSX
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          lfs: true
-      - uses: actions/cache@v3
-        with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Library-${{ matrix.projectPath }}-
-            Library-
-      - uses: game-ci/unity-builder@v2
-        with:
-          projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-      - name: Upload Build
-        uses: actions/upload-artifact@v3
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build
-
   #Other Windows build platforms: StandaloneWindows, WSAPlayer
   buildWithWindows:
-    needs: [build, buildWithMac]
+    needs: [build]
     if: needs.checklicense.outputs.is_unity_license_set == 'true'
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: windows-2019
