@@ -148,8 +148,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.RELEASE_VALUE }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ secrets.RELEASE_VALUE }}
+          release_name: Release ${{ env.RELEASE_VALUE }}
           body: Automated release
           draft: false
           prerelease: false
