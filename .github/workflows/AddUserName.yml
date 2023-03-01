@@ -15,14 +15,14 @@ jobs:
       with:
         path: "**/*.cs"
     - name: Add user name
-      if: !contains(steps.read.output, 'Created by')
+      if: ${{ !contains(steps.read.output, 'Created by') }}
       uses: actions/edit-file@v2
       with:
         path: "*.cs"
         insert: |
           // Created by: ${{ github.actor }}
     - name: Add user name
-      if: contains(steps.read.output, 'Created by: ') && !contains(steps.read.output, 'Edited by: ${{ github.actor }}')
+      if: ${{ contains(steps.read.output, 'Created by ') && !contains(steps.read.output, "Edited by) && !contains(steps.read.output, ${{ github.actor }}") }}
       uses: actions/edit-file@v2
       with:
         path: "*.cs"
