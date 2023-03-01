@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: No Release label found. Exiting.
         run: |
-          echo: Contains Release: ${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
+          echo Contains Release: ${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
           exit 1
 
   checklicense:
