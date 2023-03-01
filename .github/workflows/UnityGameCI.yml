@@ -1,10 +1,11 @@
 name: Unity Actions
 
 on:
-  push:
-    branches:
-    - dev
+  # push:
+  #   branches:
+  #   - dev
   pull_request:
+    types: [labeled]
     branches:
     - dev
 
@@ -16,7 +17,18 @@ env:
   RELEASE_VALUE: ${{ secrets.RELEASE_VALUE }}
 
 jobs:
+  CheckForReleaseLabel:
+    name: Check pull request has Release label.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: No Release label found. Exiting.
+        run: |
+          echo: Contains Release: ${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
+          exit 1
+
   checklicense:
+    needs: [CheckForReleaseLabel]
     name: check if UNITY_LICENSE is set in github secrets
     runs-on: ubuntu-latest
     outputs:
@@ -161,5 +173,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ needs.build.outputs.artifactPath }}
-          asset_name: Build-iOS.zip
+          asset_name: ${{ env.RELEASE_VALUE }}.zip
           asset_content_type: application/zip
