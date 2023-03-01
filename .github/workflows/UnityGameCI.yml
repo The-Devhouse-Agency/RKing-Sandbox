@@ -17,19 +17,20 @@ env:
   RELEASE_VALUE: ${{ secrets.RELEASE_VALUE }}
 
 jobs:
-  CheckForReleaseLabel:
-    name: Check pull request has Release label.
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: No Release label found. Exiting.
-        run: |
-          echo Contains Release: ${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
-          exit 1
+  # CheckForReleaseLabel:
+  #   name: Check pull request has Release label.
+  #   if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: No Release label found. Exiting.
+  #       run: |
+  #         echo Contains Release: ${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
+  #         exit 1
 
   checklicense:
-    needs: [CheckForReleaseLabel]
+    # needs: [CheckForReleaseLabel]
     name: check if UNITY_LICENSE is set in github secrets
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
     runs-on: ubuntu-latest
     outputs:
       is_unity_license_set: ${{ steps.checklicense_job.outputs.is_unity_license_set }}
