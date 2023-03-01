@@ -1,18 +1,34 @@
 name: Unity Actions
 
 on:
+  # push:
+  #   branches:
+  #   - dev
   pull_request:
+    types: [labeled]
     branches:
-      -dev
+    - dev
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
   PROJECT_PATH: .
+  RELEASE_VALUE: ${{ secrets.RELEASE_VALUE }}
 
 jobs:
+  CheckForReleaseLabel:
+    name: Check pull request has Release label.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: No Release label found. Exiting.
+        run: |
+          echo Contains Release: ${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
+          exit 1
+
   checklicense:
+    needs: [CheckForReleaseLabel]
     name: check if UNITY_LICENSE is set in github secrets
     runs-on: ubuntu-latest
     outputs:
@@ -101,42 +117,9 @@ jobs:
           name: Build-${{ matrix.targetPlatform }}
           path: build
 
-  #Remove extra if condition to enable
-  buildWithMac:
-    needs: [checklicense]
-    if: ${{ needs.checklicense.outputs.is_unity_license_set == 'true' && false }}
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        targetPlatform:
-          - StandaloneOSX
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          lfs: true
-      - uses: actions/cache@v3
-        with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Library-${{ matrix.projectPath }}-
-            Library-
-      - uses: game-ci/unity-builder@v2
-        with:
-          projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-      - name: Upload Build
-        uses: actions/upload-artifact@v3
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build
-
   #Other Windows build platforms: StandaloneWindows, WSAPlayer
   buildWithWindows:
-    needs: [build, buildWithMac]
+    needs: [build]
     if: needs.checklicense.outputs.is_unity_license_set == 'true'
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: windows-2019
@@ -166,3 +149,29 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build
+          
+  createReleases:
+    needs: [buildWithWindows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_VALUE }}
+          release_name: Release ${{ env.RELEASE_VALUE }}
+          body: Automated release
+          draft: false
+          prerelease: false
+      - name: Upload release
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ needs.build.outputs.artifactPath }}
+          asset_name: ${{ env.RELEASE_VALUE }}.zip
+          asset_content_type: application/zip
