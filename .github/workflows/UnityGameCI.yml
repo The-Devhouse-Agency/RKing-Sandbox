@@ -13,6 +13,7 @@ env:
   UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
   PROJECT_PATH: .
+  RELEASE_VALUE: ${{ secrets.RELEASE_VALUE }}
 
 jobs:
   checklicense:
@@ -147,7 +148,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
+          tag_name: ${{ env.RELEASE_VALUE }}
           release_name: Release ${{ github.ref }}
           body: Automated release
           draft: false
