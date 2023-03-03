@@ -35,12 +35,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       is_unity_license_set: ${{ steps.checklicense_job.outputs.is_unity_license_set }}
+      label_name: ${{ steps.checklicense_job.outputs.label_name }}
     steps:
       - name: Check whether unity activation requests should be done
         id: checklicense_job
         run: |
             echo "Skip activation job: ${{ env.UNITY_LICENSE != '' }}"
             echo "::set-output name=is_unity_license_set::${{ env.UNITY_LICENSE != '' }}"
+            label_name=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}" | jq -r '.[].labels[].name')
+            echo "::set-output name=label_name::$label_name"
+
   activation:
     needs: [checklicense]
     if: needs.checklicense.outputs.is_unity_license_set == 'false'
@@ -59,33 +63,33 @@ jobs:
           name: ${{ steps.getManualLicenseFile.outputs.filePath }}
           path: ${{ steps.getManualLicenseFile.outputs.filePath }}
 
-  # test:
-  #   needs: [checklicense]
-  #   if: needs.checklicense.outputs.is_unity_license_set == 'true'
-  #   name: Test all modes ✨
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         lfs: true
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: Library
-  #         key: Library-test-project-${{ matrix.targetPlatform }}
-  #         restore-keys: |
-  #           Library-test-project-
-  #           Library-
-  #     # https://github.com/game-ci/unity-test-runner/releases/
-  #     - uses: game-ci/unity-test-runner@v2
-  #       id: testRunner
-  #       with:
-  #         projectPath: ${{ env.PROJECT_PATH }}
-  #         testMode: all
-  #         customParameters: "-nographics"
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test results (all modes)
-  #         path: ${{ steps.testRunner.outputs.artifactsPath }}
+  test:
+    needs: [checklicense]
+    if: needs.checklicense.outputs.is_unity_license_set == 'true'
+    name: Test all modes ✨
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-test-project-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-test-project-
+            Library-
+      # https://github.com/game-ci/unity-test-runner/releases/
+      - uses: game-ci/unity-test-runner@v2
+        id: testRunner
+        with:
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: all
+          customParameters: "-nographics"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Test results (all modes)
+          path: ${{ steps.testRunner.outputs.artifactsPath }}
 
   # #Other ubuntu build options: StandaloneLinux64, WebGL, Android
   # build:
