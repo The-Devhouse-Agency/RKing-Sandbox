@@ -42,7 +42,7 @@ jobs:
         run: |
             echo "Skip activation job: ${{ env.UNITY_LICENSE != '' }}"
             echo "::set-output name=is_unity_license_set::${{ env.UNITY_LICENSE != '' }}"
-            label_name=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}" | jq -r '.[].labels[].name')
+            label_name=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}" | jq -r '.[].labels[].name')
             echo "::set-output name=label_name::$label_name"
 
   activation:
