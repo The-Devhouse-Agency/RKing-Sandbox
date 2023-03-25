@@ -33,7 +33,6 @@ namespace Devhouse.Tools.Automation
             //versionNumber = PlayerSettings.bundleVersion;
             //versionParts = new List<string>(versionNumber.Split("."));
 
-            BitConverter.to
             //TODO: need error handling for input validation
             Debug.Log(versionParts.Count);
             GameInfo info;
