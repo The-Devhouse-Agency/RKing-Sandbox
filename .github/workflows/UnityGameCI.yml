@@ -48,7 +48,7 @@ jobs:
   activation:
     needs: [checklicense]
     #if: needs.checklicense.outputs.is_unity_license_set == 'true' && contains(github.event.pull_request.labels.*.name, 'Release')
-    #if: needs.checklicense.outputs.is_unity_license_set == 'false'
+    if: needs.checklicense.outputs.is_unity_license_set == 'true'
     name: Request activation file 🔑
     runs-on: ubuntu-latest
     steps:
