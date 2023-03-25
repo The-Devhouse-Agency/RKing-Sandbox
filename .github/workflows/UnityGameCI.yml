@@ -18,13 +18,18 @@ env:
 jobs:
   CheckForReleaseLabel:
     name: Check pull request has Release label.
-    if: !contains(github.event.pull_request.labels.*.name, 'Release')
+    #if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
     runs-on: ubuntu-latest
     steps:
       - name: No Release label found. Exiting.
         run: |
           echo Contains Release? -${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
-          exit 1
+          if [ contains(github.event.pull_request.labels.*.name, 'Release') ]; then
+            echo "Time to make a build!"
+          else
+            echo "Release tag not set. Cancelling."
+            exit 1
+          fi
 
   checklicense:
     # needs: [CheckForReleaseLabel]
