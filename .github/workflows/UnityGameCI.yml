@@ -24,7 +24,7 @@ jobs:
       - name: No Release label found. Exiting.
         run: |
           echo Contains Release? -${{ contains(github.event.pull_request.labels.*.name, 'Release') }}
-          if [ contains(github.event.pull_request.labels.*.name, 'Release') ]; then
+          if [ ${{ contains(github.event.pull_request.labels.*.name, 'Release') }} ]; then
             echo "Time to make a build!"
           else
             echo "Release tag not set. Cancelling."
