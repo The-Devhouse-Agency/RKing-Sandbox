@@ -29,7 +29,7 @@ jobs:
 
   checklicense:
     needs: [CheckForReleaseLabel]
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
+    #if: ${{ !contains(github.event.pull_request.labels.*.name, 'Release') }}
     name: check if UNITY_LICENSE is set in github secrets
     runs-on: ubuntu-latest
     env:
