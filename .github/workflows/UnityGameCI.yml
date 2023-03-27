@@ -1,11 +1,14 @@
 name: Unity Actions
 
 on:
-  workflow_run:
-    workflows:
-      - "Release Tag Check"
-    types:
-      - "unity-actions"
+  repository_dispatch:
+    types: [unity-actions]
+# on:
+#   workflow_run:
+#     workflows:
+#       - "Release Tag Check"
+#     types:
+#       - "unity-actions"
 #on: [pull_request]
   # push:
   #   branches:
