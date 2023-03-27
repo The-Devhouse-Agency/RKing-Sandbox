@@ -15,7 +15,7 @@ jobs:
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -X POST \
               -H "Accept: application/vnd.github.everest-preview+json" \
-              https://api.github.com/repos/RKing-Sandbox/dispatches \
+              https://api.github.com/repos/The-Devhouse-Agency/RKing-Sandbox/dispatches \
               -d '{"event_type":"unity-actions", "client_payload":{"branch":"dev"}}'
           else
             echo "Release tag not set. Cancelling."
