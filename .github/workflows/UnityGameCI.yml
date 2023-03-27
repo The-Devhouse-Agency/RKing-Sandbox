@@ -1,6 +1,12 @@
 name: Unity Actions
 
-on: [pull_request]
+on:
+  workflow_run:
+    workflows:
+      - "Release Tag Check"
+    types:
+      - "unity-actions"
+#on: [pull_request]
   # push:
   #   branches:
   #   - dev
@@ -53,7 +59,12 @@ jobs:
 
   activation:
     needs: [checklicense]
-    if: contains(github.event.pull_request.labels.*.name, 'Release') && needs.checklicense.outputs.is_unity_license_set == 'true'
+    if: >
+      contains(github.event.repository.full_name, 'The-Devhouse-Agency/RKing-Sandbox') &&
+      github.event.workflow.name == 'Release Tag Check' &&
+      needs.checklicense.outputs.is_unity_license_set == 'true' &&
+      env.RELEASE_VALUE
+    #if: contains(github.event.pull_request.labels.*.name, 'Release') && needs.checklicense.outputs.is_unity_license_set == 'true'
     name: Request activation file 🔑
     runs-on: ubuntu-latest
     steps:
