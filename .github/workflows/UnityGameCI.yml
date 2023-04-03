@@ -1,4 +1,4 @@
-name: Unity Actions
+name: UnityActionsCI
 
 on:
   pull_request:
@@ -13,7 +13,7 @@ env:
 
 jobs:
   CheckForReleaseLabel:
-    name: Check pull request has Release label.
+    name: Check if pull request has Release label.
     runs-on: ubuntu-latest
     steps:
       - name: No Release label found. Exiting.
@@ -28,7 +28,7 @@ jobs:
 
   checklicense:
     needs: [CheckForReleaseLabel]
-    name: check if UNITY_LICENSE is set in github secrets
+    name: Check if UNITY_LICENSE is set in github secrets
     runs-on: ubuntu-latest
     env:
       ACTIONS_STEP_DEBUG: true
@@ -82,10 +82,6 @@ jobs:
           projectPath: ${{ env.PROJECT_PATH }}
           testMode: all
           customParameters: "-nographics"
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Test results (all modes)
-      #     path: ${{ steps.testRunner.outputs.artifactsPath }}
 
   buildWithWindows:
     needs: [test]
