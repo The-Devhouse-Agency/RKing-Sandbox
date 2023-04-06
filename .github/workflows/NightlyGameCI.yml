@@ -21,8 +21,6 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneWindows64
-        projectPath:
-          - ${{ env.PROJECT_PATH }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
