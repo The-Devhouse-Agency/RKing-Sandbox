@@ -2,7 +2,7 @@ name: NightlyGameCI
 
 on:
   schedule:
-    - cron: '20 17 * * *'
+    - cron: '35 22 * * *'
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
