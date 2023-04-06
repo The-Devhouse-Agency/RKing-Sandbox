@@ -2,7 +2,7 @@ name: NightlyGameCI
 
 on:
   schedule:
-    - cron: "50 22 * * *"
+    - cron: "6 23 * * *"
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -13,7 +13,6 @@ env:
 
 jobs:
   buildWithWindows:
-    needs: [test]
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: windows-2019
     strategy:
