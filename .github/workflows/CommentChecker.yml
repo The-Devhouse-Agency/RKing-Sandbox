@@ -1,8 +1,9 @@
 name: Comment Checker
 
 on:
-  pull_request:
-    types: [opened, reopened, edited]
+  workflow dispatch:
+  #pull_request:
+    #types: [opened, reopened, edited]
 
 jobs:
   is-comment-empty:
