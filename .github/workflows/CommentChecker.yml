@@ -1,23 +1,22 @@
-name: Comment Checker
+# name: Comment Checker
 
-on:
-  workflow dispatch:
-  #pull_request:
-    #types: [opened, reopened, edited]
+# on:
+#   pull_request:
+#     types: [opened, reopened, edited]
 
-jobs:
-  is-comment-empty:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Is comment empty?
-#        uses: actions/github-script@v6
-        if: ${{ github.event.pull_request.body == null }}
-        run: |
-              run: echo "Comment is empty."
-              (exit 1)
-#          }
-#              core.setFailed('Comment is empty.')
-#        run: echo "Comment is empty."
-#             exit 1
-#          echo "Comment is empty."
-#          (exit 1)
+# jobs:
+#   is-comment-empty:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Is comment empty?
+# #        uses: actions/github-script@v6
+#         if: ${{ github.event.pull_request.body == null }}
+#         run: |
+#               run: echo "Comment is empty."
+#               (exit 1)
+# #          }
+# #              core.setFailed('Comment is empty.')
+# #        run: echo "Comment is empty."
+# #             exit 1
+# #          echo "Comment is empty."
+# #          (exit 1)
