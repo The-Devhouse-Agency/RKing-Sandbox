@@ -2,7 +2,7 @@ name: NightlyGameCI
 
 on:
   schedule:
-    - cron: "22 23 * * *"
+    - cron: "10 7 * * *"
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -36,6 +36,9 @@ jobs:
         with:
           projectPath: ${{ env.PROJECT_PATH }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildsPath: ${{ env.PROJECT_PATH }}/Build
+          unityVersion: 2021.3.11f1
+          versioning: Semantic
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
