@@ -1,8 +1,9 @@
 name: NightlyGameCI
 
 on:
-  schedule:
-    - cron: "10 7 * * *"
+  workflow_dispatch: {} # Temporarily disable
+  # schedule:
+  #   - cron: "10 7 * * *"
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
