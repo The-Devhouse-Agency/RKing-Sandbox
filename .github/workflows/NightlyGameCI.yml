@@ -1,16 +1,17 @@
-name: NightlyGameCI
+# Created by: Ryan King
+
+name: NightlyBuildCI
 
 on:
-  workflow_dispatch: {} # Temporarily disable
-  # schedule:
-  #   - cron: "10 7 * * *"
+  workflow_dispatch: {} # Can be run manually from actions page if needed.
+  schedule:
+    - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri.
 
 env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
   UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
   PROJECT_PATH: .
-  RELEASE_VALUE: ${{ secrets.RELEASE_VALUE }}
 
 jobs:
   buildWithWindows:
@@ -22,26 +23,26 @@ jobs:
         targetPlatform:
           - StandaloneWindows64
     steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%m-%d')"
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           lfs: true
+          ref: dev-iteration
       - uses: actions/cache@v3
         with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
           restore-keys: |
-            Library-${{ matrix.projectPath }}-
-            Library-
+            Library-${{ matrix.targetPlatform }}
       - uses: game-ci/unity-builder@v2
         with:
-          projectPath: ${{ env.PROJECT_PATH }}
+          buildName: Catmai_NightlyIteration_${{ steps.date.outputs.date }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          buildsPath: ${{ env.PROJECT_PATH }}/Build
-          unityVersion: 2021.3.11f1
-          versioning: Semantic
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}
-          path: ${{ env.PROJECT_PATH }}/Build
+          path: build
