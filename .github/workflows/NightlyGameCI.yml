@@ -30,7 +30,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           lfs: true
-          ref: dev-iteration
       - uses: actions/cache@v3
         with:
           path: Library
