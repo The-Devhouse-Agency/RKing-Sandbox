@@ -4,8 +4,8 @@ name: NightlyBuildCI
 
 on:
   workflow_dispatch: {} # Can be run manually from actions page if needed.
-  schedule:
-    - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri.
+#   schedule:
+#     - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri.
 
 env:
   UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
@@ -45,4 +45,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}
+          path: build
+      - name: Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
+        with: 
+          name: Catmai_NightlyIteration_${{ steps.date.outputs.date }}
           path: build
