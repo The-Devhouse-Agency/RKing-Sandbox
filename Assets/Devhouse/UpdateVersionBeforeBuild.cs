@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEngine;
+#endif
 
 namespace Devhouse.Tools.Automation
 {
-    public class UpdateVersionBeforeBuild : MonoBehaviour, IPreprocessBuildWithReport 
+    public class UpdateVersionBeforeBuild : MonoBehaviour // ***TEMP REMOVE FOR BUILD ISSUES***  , IPreprocessBuildWithReport
     {
+        /*
         public int callbackOrder { get { return 0; } }
         public void OnPreprocessBuild(BuildReport report)
         {
@@ -88,6 +91,6 @@ namespace Devhouse.Tools.Automation
         public string VersionNumberAsString()
         {
             return versionMajor + "." + versionMinor + "." + versionCommit + "." + versionBuild;
-        }
+        }*/
     }
 }
