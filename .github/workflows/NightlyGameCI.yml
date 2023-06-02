@@ -51,8 +51,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}_${{ github.event.push.head }}
-          release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}_${{ github.event.push.head }}
+          tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}_${{ github.run_attempt }}
+          release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}_${{ github.run_attempt }}
           draft: false
           prerelease: true
       - name: Upload Release Asset
