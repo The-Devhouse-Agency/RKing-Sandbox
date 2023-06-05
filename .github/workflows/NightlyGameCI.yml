@@ -43,7 +43,7 @@ jobs:
       - name: Zip build
         uses: vimtor/action-zip@v1
         with:
-          files: build
+          files: build/
           dest: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
       - name: Upload Build
         uses: actions/upload-artifact@v3
