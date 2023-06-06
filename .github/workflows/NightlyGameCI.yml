@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%m-%d')"
+        run: echo "::set-output name=date::$(date +'%m-%d-%H-%M')"
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
@@ -56,8 +56,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}_${{ github.run_attempt }}
-          release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}_${{ github.run_attempt }}
+          tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+          release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
           draft: false
           prerelease: true
       - name: Upload Release Asset
