@@ -1,0 +1,20 @@
+changelog:
+  exclude:
+    labels:
+      - ReleaseIgnore
+  categories:
+    - title: New Features
+      labels:
+        - Feature
+    - title: Bug Fixes
+      labels:
+        - Bug
+    - title: Level Design
+      labels:
+        - LevelDesign
+    - title: Backend
+      labels:
+        - Backend
+    - title: Other Changes
+      labels:
+        - "*"
