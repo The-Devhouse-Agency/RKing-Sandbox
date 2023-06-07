@@ -52,10 +52,8 @@ jobs:
 #         with:
 #           name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
 #           path: build
-      - name: Generate release notes
-        id: release_notes
-        uses: fresa/release-notes-generator@v2.0.1
-      - run: echo "${{ steps.release_notes.outputs.release_notes }}"
+      - name: Generate Release Notes
+        uses: johnyherangi/create-release-notes@v1
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
