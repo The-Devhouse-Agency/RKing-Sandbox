@@ -54,12 +54,7 @@ jobs:
 #           path: build
       - name: Generate release notes
         id: release_notes
-        uses: fresa/release-notes-generator@master
-        with:
-          version: v2.0.0
-          last_release_ref: v1.0.1
-          release_ref: v2.0.0
-          path_to_commits: ./commits.json
+        uses: fresa/release-notes-generator@v2.0.1
       - run: echo "${{ steps.release_notes.outputs.release_notes }}"
       - name: Create Release
         id: create_release
