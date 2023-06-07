@@ -30,26 +30,37 @@ jobs:
         uses: actions/checkout@v3
         with:
           lfs: true
-      - uses: actions/cache@v3
+          # Fetches entire history, so we can analyze commits
+          fetch-depth: 0
+#       - uses: actions/cache@v3
+#         with:
+#           path: Library
+#           key: Library-${{ matrix.targetPlatform }}
+#           restore-keys: |
+#             Library-${{ matrix.targetPlatform }}
+#       - uses: game-ci/unity-builder@v2
+#         with:
+#           buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+#           targetPlatform: ${{ matrix.targetPlatform }}
+#       - name: Zip build
+#         uses: vimtor/action-zip@v1
+#         with:
+#           files: build/
+#           dest: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
+#       - name: Upload Build
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+#           path: build
+      - name: Generate release notes
+        id: release_notes
+        uses: fresa/release-notes-generator@master
         with:
-          path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}
-      - uses: game-ci/unity-builder@v2
-        with:
-          buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-      - name: Zip build
-        uses: vimtor/action-zip@v1
-        with:
-          files: build/
-          dest: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-      - name: Upload Build
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-          path: build
+          version: v2.0.0
+          last_release_ref: v1.0.1
+          release_ref: v2.0.0
+          path_to_commits: ./commits.json
+      - run: echo "${{ steps.release_notes.outputs.release_notes }}"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -60,15 +71,25 @@ jobs:
           release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
           draft: false
           prerelease: true
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
-          # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-          asset_name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-          asset_content_type: application/zip
+          body: "${{ steps.release_notes.outputs.release_notes }}"
+#       - name: Generate Release Notes
+#         uses: actions/github-script@v4.0.2
+#         with:
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           script: |
+#             await github.request('POST /repos/${{ github.repository }}/releases', {
+#               tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
+#               generate_release_notes: true
+#             });
+#       - name: Upload Release Asset
+#         id: upload-release-asset
+#         uses: actions/upload-release-asset@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
+#           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+#           upload_url: ${{ steps.create_release.outputs.upload_url }}
+#           asset_path: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
+#           asset_name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
+#           asset_content_type: application/zip
