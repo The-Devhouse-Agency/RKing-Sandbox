@@ -74,7 +74,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.request('POST /repos/The-Devhouse-Agency/${{ github.repository }}/releases/generate-notes', {
+            await github.request('POST /repos/The-Devhouse-Agency/${{ github.event.repository.name }}/releases/generate-notes', {
                 owner: 'The-Devhouse-Agency',
                 repo: "${{ github.repository }}",
                 tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
