@@ -13,3 +13,4 @@ art2
 backend2
 feature2 
 leveldesign2 
+releaseignore2 
