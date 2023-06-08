@@ -6,3 +6,4 @@ Testing comment checker
 art
 level design
 feature
+feature2
