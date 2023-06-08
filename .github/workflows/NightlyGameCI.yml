@@ -52,6 +52,10 @@ jobs:
 #         with:
 #           name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
 #           path: build
+  ReleaseCreation:
+    name: Release Creation
+    runs-on: ubuntu-latest
+    steps:
       - name: Generate Release Notes
         id: release_notes
         uses: johnyherangi/create-release-notes@v1
@@ -59,7 +63,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
           release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
