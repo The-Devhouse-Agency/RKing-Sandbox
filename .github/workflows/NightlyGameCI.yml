@@ -79,35 +79,6 @@ jobs:
                                   });
       - name: Output release return
         run: echo "${{ steps.create_release.outputs.result }}"
-#       - name: Create Release
-#         id: create_release
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ github.token }}
-#         with:
-#           tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           draft: false
-#           prerelease: true
-#           body: "${{ steps.release_notes.outputs.release-notes }}"
-#       - name: Generate Release Notes
-#         uses: actions/github-script@v4.0.2
-#         with:
-#           github-token: ${{ secrets.GITHUB_TOKEN }}
-#           script: |
-#             await github.request('POST /repos/The-Devhouse-Agency/${{ github.event.repository.name }}/releases/generate-notes', {
-#                 owner: 'The-Devhouse-Agency',
-#                 repo: "${{ github.repository }}",
-#                 tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
-#                 headers: {
-#                   'X-GitHub-Api-Version': '2022-11-28'
-#                 }
-#               });
-              
-#            await github.request('POST /repos/${{ github.repository }}/releases', {
-#              tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
-#              generate_release_notes: true
-#            });
 
 #       - name: Upload Release Asset
 #         id: upload-release-asset
