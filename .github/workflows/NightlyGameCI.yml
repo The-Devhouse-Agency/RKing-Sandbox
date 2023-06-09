@@ -29,32 +29,32 @@ jobs:
       - name: Get current date
         id: date
         run: echo "date=$(date +'%m-%d-%H-%M')" >> $env:GITHUB_OUTPUT
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           lfs: true
-#           # Fetches entire history, so we can analyze commits
-#           fetch-depth: 0
-#       - uses: actions/cache@v3
-#         with:
-#           path: Library
-#           key: Library-${{ matrix.targetPlatform }}
-#           restore-keys: |
-#             Library-${{ matrix.targetPlatform }}
-#       - uses: game-ci/unity-builder@v2
-#         with:
-#           buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           targetPlatform: ${{ matrix.targetPlatform }}
-#       - name: Zip build
-#         uses: vimtor/action-zip@v1
-#         with:
-#           files: build/
-#           dest: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-#       - name: Upload Build
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           path: build
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          # Fetches entire history, so we can analyze commits
+          fetch-depth: 0
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}
+      - uses: game-ci/unity-builder@v2
+        with:
+          buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+      - name: Zip build
+        uses: vimtor/action-zip@v1
+        with:
+          files: build/
+          dest: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+          path: build
   ReleaseCreation:
     name: Release Creation
     runs-on: ubuntu-latest
