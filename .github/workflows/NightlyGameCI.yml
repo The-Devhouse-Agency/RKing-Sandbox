@@ -18,6 +18,8 @@ jobs:
   buildWithWindows:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: windows-2019
+    outputs:
+      date: ${{ steps.date.outputs.date }}
     strategy:
       fail-fast: false
       matrix:
@@ -68,8 +70,8 @@ jobs:
              return await github.request('POST /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases', {
                                     owner: "${{ github.repository_owner }}",
                                     repo: "${{ github.repository }}",
-                                    tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ needs.date.outputs.date }}",
-                                    name: "NightlyBuild/${{ github.event.repository.name }}_${{ needs.date.outputs.date }}",
+                                    tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}",
+                                    name: "NightlyBuild/${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}",
                                     draft: false,
                                     prerelease: true,
                                     generate_release_notes: true,
@@ -86,6 +88,6 @@ jobs:
           # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           upload_url: ${{ steps.create_release.outputs.result }}
-          asset_path: build/${{ github.event.repository.name }}_${{ needs.date.outputs.date }}.zip
-          asset_name: ${{ github.event.repository.name }}_${{ needs.date.outputs.date }}.zip
+          asset_path: build/${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}.zip
+          asset_name: ${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}.zip
           asset_content_type: application/zip
