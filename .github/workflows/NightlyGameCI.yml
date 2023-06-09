@@ -65,7 +65,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: json
           script: |
-             cosnt requestObj = await github.request('POST /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases', {
+             return await github.request('POST /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases', {
                                     owner: "${{ github.repository_owner }}",
                                     repo: "${{ github.repository }}",
                                     tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
@@ -76,8 +76,7 @@ jobs:
                                     headers: {
                                       'X-GitHub-Api-Version': '2022-11-28'
                                     }
-                                  })
-                return requestObj.data.html_url;
+                                  }).then((obj) => { return obj.data.html_url });
       - name: Output release return
         run: echo "${{ steps.create_release.outputs.result }}"
 
