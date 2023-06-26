@@ -6,7 +6,7 @@ name: NightlyBuildCI
 on:
   workflow_dispatch: {} # Can be run manually from actions page if needed.
   schedule:
-    - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri.
+    - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri (cst?).
 
 env:
   ########## Required GITHUB/Game-CI Vars ##########
@@ -95,15 +95,25 @@ jobs:
           path: ${{env.CI_ZIP_DEST}}
 
       #! This is for testing purposes only! Disable this step when scheduling the nightly to avoid creating a new branch every day
-      - name: "Stage, Commit, and Push All Changes (the build files) to the new branch"
-        uses: EndBug/add-and-commit@v9.1.3
-        with:
-          author_name: Nightly Build CI
-          message: "[GITHUB ACTION] Committing raw build files to repo for debugging purposes."
-          new_branch: ci/nightly-build-out/${{ steps.date.outputs.date }}
-          push: true
-          tag_push: --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
+      # - name: "Stage, Commit, and Push All Changes (the build files) to the new branch"
+      #   uses: EndBug/add-and-commit@v9.1.3
+      #   with:
+      #     author_name: Nightly Build CI
+      #     message: "[GITHUB ACTION] Committing raw build files to repo for debugging purposes."
+      #     new_branch: ci/nightly-build-out/${{ steps.date.outputs.date }}
+      #     push: true
+      #     tag_push: --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
 
+      - name: "Manually Push virtual env's working copy to a branch"
+        run: |
+          git config user.name "Nightly Build CI Bot"
+          git config user.email "<>"
+          git config --global core.safecrlf false #disables line ending warnings
+          git checkout -b ci/nightly-build-out/${{ steps.date.outputs.date }}
+          git add . 
+          git commit -m "[GITHUB ACTION] Committing raw build files to repo for debugging purposes."
+          git push origin --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
+          
   #TODO: Uncomment job after testing!
   # Generates a Github Release after the buildWithWindows job succeeds by downloading the artifact
   # ReleaseCreation:
