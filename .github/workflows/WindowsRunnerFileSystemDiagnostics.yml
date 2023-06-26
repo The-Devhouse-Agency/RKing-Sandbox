@@ -26,8 +26,8 @@ jobs:
       - name: Output Disk Space to Workflow
         shell: cmd
         run: |
-          echo "::set-output name=annotation::${{ steps.freeSpaceCheck.outputs.stdout }}"
-          echo "::set-output name=directory-info::see logs for a recursive directory listing"
+          echo "annotation=${{ steps.freeSpaceCheck.outputs.stdout }}" >> $GITHUB_OUTPUT
+          echo "directory-info=see logs for a recursive directory listing" >> $GITHUB_OUTPUT
 
       - name: C Drive Directory Map
         shell: cmd
