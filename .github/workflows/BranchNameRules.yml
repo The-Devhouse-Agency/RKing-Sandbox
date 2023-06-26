@@ -1,0 +1,21 @@
+name: Branch Name Rules
+
+on: [pull_request]
+
+jobs:
+  check-prefix:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Branch name rules
+      uses: deepakputhraya/action-branch-name@v1.0.0
+      with:
+        regex: '([a-z])+\/\w+'
+        # Comma separated list of prefix that must be used in every branch. eg: feature,hotfix,JIRA-
+        allowed_prefixes: 'feature,bug,art,archive,iteration'
+        # Comma separated list of branch names to ignore. eg: master,develop. Optional, default is master
+        ignore: 'main,dev'
+        # Min length of branch name. Optional, default is 1 
+        min_length: 1
+        # Max length of branch name. -1 to ignore the rule. Optional, default is -1
+        max_length: -1
