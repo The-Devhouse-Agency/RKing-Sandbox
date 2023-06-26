@@ -112,7 +112,7 @@ jobs:
           git checkout -b ci/nightly-build-out/${{ steps.date.outputs.date }}
           git add . 
           git commit -m "[GITHUB ACTION] Committing raw build files to repo for debugging purposes."
-          git push origin --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
+          git push --set-upstream origin --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
           
   #TODO: Uncomment job after testing!
   # Generates a Github Release after the buildWithWindows job succeeds by downloading the artifact
