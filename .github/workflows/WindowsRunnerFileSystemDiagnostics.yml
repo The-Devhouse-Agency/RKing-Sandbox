@@ -21,7 +21,7 @@ jobs:
       - name: Check Free Space
         id: freeSpaceCheck
         shell: cmd
-        run: wmic logicaldisk where "DeviceID='C:'" get FreeSpace,Size > wmic_output.txt
+        run: wmic logicaldisk where "DeviceID='C:'" get FreeSpace,Size
       
       - name: Output Disk Space to Workflow
         shell: cmd
@@ -29,11 +29,15 @@ jobs:
           echo "::set-output name=annotation::${{ steps.freeSpaceCheck.outputs.stdout }}"
           echo "::set-output name=directory-info::see logs for a recursive directory listing"
 
-      - name: Output Directory Map
+      - name: C Drive Directory Map
         shell: cmd
         run: |
-          cd \
+          cd C:\
           dir /s
 
-        
+      - name: D Drive Directory Map
+        shell: cmd
+        run: |
+          cd D:\
+          dir /s
                     
