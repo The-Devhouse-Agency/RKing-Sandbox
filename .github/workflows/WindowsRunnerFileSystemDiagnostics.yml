@@ -1,0 +1,36 @@
+# Created by: Julian Noel
+
+# Set of Jobs/steps that can provide insight to the virtual runner's environment
+
+name: RunnerFileSystemDiagnostics
+
+on:
+  
+  workflow_dispatch: {}
+
+jobs:
+  WindowsRunnerDiag:
+    name: Runner FileSystem Diagnostics (windows-2019)
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+        - StandaloneWindows64
+    steps:
+      - name: Check Free Space
+        id: freeSpaceCheck
+        run: wmic logicaldisk where "DeviceID='C:'" get FreeSpace,Size > wmic_output.txt
+      
+      - name: Output Disk Space to Workflow
+        run: |
+          echo "::set-output name=annotation::${{ steps.freeSpaceCheck.outputs.stdout }}"
+          echo "::set-output name=directory-info::see logs for a recursive directory listing"
+
+      - name: Output Directory Map
+        run: |
+          cd \
+          dir /s
+
+        
+                    
