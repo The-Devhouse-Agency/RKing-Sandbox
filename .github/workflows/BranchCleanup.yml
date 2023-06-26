@@ -1,0 +1,34 @@
+name: Branch Cleanup
+
+on:
+  workflow_dispatch: {}
+#  schedule:
+#    - cron:  '0 0 * * 0'  # This means every Sunday at 00:00
+
+jobs:
+  branch-cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Run script
+      run: |
+        TOKEN="${{ secrets.GITHUB_TOKEN }}"
+        OWNER="${{ github.repository_owner }}"
+        REPO="${{ github.repository }}"
+        branches=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/branches)
+        for branch in $branches
+        do
+          last_commit_date=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/commits/$branch | jq -r .commit.author.date)
+          last_commit_timestamp=$(date -d "$last_commit_date" +%s)
+          one_week_ago=$(date -d '15 minutes ago' +%s)    #          one_week_ago=$(date -d '1 week ago' +%s)
+          if [[ $last_commit_timestamp -lt $one_week_ago ]]
+          then
+            echo $branch
+          fi
+        done
