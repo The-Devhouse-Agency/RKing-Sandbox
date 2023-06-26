@@ -70,10 +70,10 @@ jobs:
       # it titles it with the buildName and stores it under a predetermined path;
       # said path appears to be our BUILD_OUTPUT_DIR variable followed by the name of the target platform. 
       # Be sure to specify both in order to find a specific build's files!
-      - uses: game-ci/unity-builder@v2
-        with:
-          buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-          targetPlatform: ${{ matrix.targetPlatform }}
+      # - uses: game-ci/unity-builder@v2
+      #   with:
+      #     buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+      #     targetPlatform: ${{ matrix.targetPlatform }}
 
       # zips the given "files" into a zip archive. The full path and title of the zip archive is stated in dest. 
       # This is the full name of the zip archive itself, not just its target folder, so use a file extension.
