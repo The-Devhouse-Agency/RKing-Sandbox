@@ -1,121 +1,168 @@
 # Created by: Ryan King
-
+# Modified by: Julian Noel
+#    derived from NightlyBuildCI.yml in https://github.com/The-Devhouse-Agency/CatFishing/tree/NightlyBuild/CatFishing_06-22-19-16
 name: NightlyBuildCI
 
 on:
   workflow_dispatch: {} # Can be run manually from actions page if needed.
-#   schedule:
-#     - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri.
+  schedule:
+    - cron: '0 4 * * 1-5' # Scheduled to run at 11PM Mon-Fri (cst?).
 
 env:
+  ########## Required GITHUB/Game-CI Vars ##########
+
   UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
   UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
   PROJECT_PATH: .
   GITHUB_TOKEN: ${{ github.token }}
 
+  ########## CUSTOM VARS ##########
+
+  CURR_WORKING_BRANCH: "feature/julian/nightly-CI-test" #"dev"
+  LIBRARY_DIR_GLOB: "Library/"
+  CI_ZIP_DEST: "CI/ZipOutput/"
+
+  #where we're expecting game-ci to output all of its builds.
+  # operating on this directory directly will interact with ALL the build targets
+  #! Individual builds will be under subfolders labeled with the targetPlatform! 
+  BUILD_OUTPUT_DIR: "Build/"
+
 jobs:
+
+  # TODO: Ensure caching works now; likely was a glob syntax issue (directories must end with / to be distinguished from files.)
+  #Generates a Unity build from the project in the repo, packages it, and uploads the artifact
   buildWithWindows:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: windows-2019
+    outputs:
+      date: ${{ steps.date.outputs.date }}
     strategy:
       fail-fast: false
       matrix:
         targetPlatform:
           - StandaloneWindows64
     steps:
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%m-%d-%H-%M')" >> $env:GITHUB_OUTPUT
+
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           lfs: true
           # Fetches entire history, so we can analyze commits
           fetch-depth: 0
-#       - uses: actions/cache@v3
-#         with:
-#           path: Library
-#           key: Library-${{ matrix.targetPlatform }}
-#           restore-keys: |
-#             Library-${{ matrix.targetPlatform }}
-#       - uses: game-ci/unity-builder@v2
-#         with:
-#           buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           targetPlatform: ${{ matrix.targetPlatform }}
-#       - name: Zip build
-#         uses: vimtor/action-zip@v1
-#         with:
-#           files: build/
-#           dest: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-#       - name: Upload Build
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           path: build
-  ReleaseCreation:
-    name: Release Creation
-    runs-on: ubuntu-latest
-    needs: buildWithWindows
-    steps:
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%m-%d-%H-%M')"
-      - name: Create Release With Rest
-        id: create_release
-        uses: actions/github-script@v4.0.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-             await github.request('POST /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases', {
-                                    owner: "${{ github.repository_owner }}",
-                                    repo: "${{ github.repository }}",
-                                    tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
-                                    name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
-                                    draft: false,
-                                    prerelease: true,
-                                    generate_release_notes: true,
-                                    headers: {
-                                      'X-GitHub-Api-Version': '2022-11-28'
-                                    }
-                                  });
-    
-#       - name: Create Release
-#         id: create_release
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ github.token }}
-#         with:
-#           tag_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           release_name: NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
-#           draft: false
-#           prerelease: true
-#           body: "${{ steps.release_notes.outputs.release-notes }}"
-#       - name: Generate Release Notes
-#         uses: actions/github-script@v4.0.2
-#         with:
-#           github-token: ${{ secrets.GITHUB_TOKEN }}
-#           script: |
-#             await github.request('POST /repos/The-Devhouse-Agency/${{ github.event.repository.name }}/releases/generate-notes', {
-#                 owner: 'The-Devhouse-Agency',
-#                 repo: "${{ github.repository }}",
-#                 tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
-#                 headers: {
-#                   'X-GitHub-Api-Version': '2022-11-28'
-#                 }
-#               });
-              
-#            await github.request('POST /repos/${{ github.repository }}/releases', {
-#              tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}",
-#              generate_release_notes: true
-#            });
+          ref: ${{env.CURR_WORKING_BRANCH}} #our current working branch
 
-#       - name: Upload Release Asset
-#         id: upload-release-asset
-#         uses: actions/upload-release-asset@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
-#           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-#           upload_url: ${{ steps.create_release.outputs.upload_url }}
-#           asset_path: build/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-#           asset_name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
-#           asset_content_type: application/zip
+      # this caching process will first try to restore the saved cache (so that it is already present for the build process) to the given directory
+      # and in a post stage, it will then collect the contents of the path property (recursively, by default) and save them to the Caches area under the key
+      - name: Cache Unity Library folder (both restore (if found) and later save)
+        #! If need be, the restore and save actions can be run with "actions/cache@v3/restore" and "actions/cache@v3/save"
+        uses: actions/cache@v3 
+        with:
+          path: ${{env.LIBRARY_DIR_GLOB}}
+          key: ${{env.LIBRARY_DIR_GLOB}}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            ${{env.LIBRARY_DIR_GLOB}}-${{ matrix.targetPlatform }}
+      
+      #! This is the big-ass step that can take HOURS. Attempts to build the whole game for the given target platform(s)
+      # it titles it with the buildName and stores it under a predetermined path;
+      # said path appears to be our BUILD_OUTPUT_DIR variable followed by the name of the target platform. 
+      # Be sure to specify both in order to find a specific build's files!
+      # - uses: game-ci/unity-builder@v2
+      #   with:
+      #     buildName: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+      #     targetPlatform: ${{ matrix.targetPlatform }}
+
+      # zips the given "files" into a zip archive. The full path and title of the zip archive is stated in dest. 
+      # This is the full name of the zip archive itself, not just its target folder, so use a file extension.
+      - name: Zip build
+        uses: vimtor/action-zip@v1
+        with:
+          #"files" can be files OR directories; the latter must end in "/" in order to be distinguished from files without extensions.
+          files: build/ 
+          # repo-relative location to output the zip created by this step's action
+          dest: ${{ env.CI_ZIP_DEST }}/${{ github.event.repository.name }}_${{ steps.date.outputs.date }}.zip
+
+      # Uploading the zip archive we created in the "Zip build" step.
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}_${{ steps.date.outputs.date }}
+          # according to docs: A file, directory or wildcard pattern that describes what to upload
+          # this is presumably a glob then, in which case directories should end with /
+          path: ${{env.CI_ZIP_DEST}}
+
+      #! This is for testing purposes only! Disable this step when scheduling the nightly to avoid creating a new branch every day
+      # - name: "Stage, Commit, and Push All Changes (the build files) to the new branch"
+      #   uses: EndBug/add-and-commit@v9.1.3
+      #   with:
+      #     author_name: Nightly Build CI
+      #     message: "[GITHUB ACTION] Committing raw build files to repo for debugging purposes."
+      #     new_branch: ci/nightly-build-out/${{ steps.date.outputs.date }}
+      #     push: true
+      #     tag_push: --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
+
+      - name: "Manually Push virtual env's working copy to a branch"
+        run: |
+          git config user.name "Nightly Build CI Bot"
+          git config user.email "<>"
+          git config --global core.safecrlf false #disables line ending warnings
+          git checkout -b ci/nightly-build-out/${{ steps.date.outputs.date }}
+          git add . 
+          git commit -m "[GITHUB ACTION] Committing raw build files to repo for debugging purposes."
+          git push --set-upstream origin ci/nightly-build-out/${{ steps.date.outputs.date }} --force #don't care if it overwrites, just need to ensure it pushes the latest; shouldn't have anything to overwrite anyway, so this is just in case.
+          
+  #TODO: Uncomment job after testing!
+  # Generates a Github Release after the buildWithWindows job succeeds by downloading the artifact
+  # ReleaseCreation:
+  #   name: Release Creation
+  #   runs-on: ubuntu-latest
+  #   needs: buildWithWindows
+  #   steps:
+
+  #     - name: Download Build
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: ${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }} #does does "needs" work?
+  #         path: ${{env.CI_ZIP_DEST}}
+
+  #     - name: Create Release With Rest
+  #       id: create_release
+  #       uses: actions/github-script@v4.0.2
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         result-encoding: json
+  #         #javascript, from the looks of it
+  #         script: |
+  #            return await github.request('POST /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases', {
+  #                                   owner: "${{ github.repository_owner }}",
+  #                                   repo: "${{ github.repository }}",
+  #                                   tag_name: "NightlyBuild/${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}",
+  #                                   name: "NightlyBuild/${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}",
+  #                                   draft: false,
+  #                                   prerelease: true,
+  #                                   generate_release_notes: true,
+  #                                   headers: {
+  #                                     'X-GitHub-Api-Version': '2022-11-28'
+  #                                   }
+  #                                 }).then((obj) => { return obj.data.upload_url });
+
+  #     - name: Remove quotes from upload_url
+  #       id: remove_quotes
+  #       run: |
+  #         value=${{ steps.create_release.outputs.result }}
+  #         echo "clean_url=${value//\"/}" >> "$GITHUB_OUTPUT"
+  #       shell: bash
+
+  #     - name: Upload Release Asset
+  #       id: upload-release-asset
+  #       uses: actions/upload-release-asset@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         upload_url: ${{ steps.remove_quotes.outputs.clean_url }}
+  #         asset_path: ${{env.CI_ZIP_DEST}}/${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}.zip
+  #         asset_name: ${{ github.event.repository.name }}_${{ needs.buildWithWindows.outputs.date }}.zip
+  #         asset_content_type: application/zip
