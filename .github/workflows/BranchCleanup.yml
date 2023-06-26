@@ -29,7 +29,7 @@ jobs:
           then
             last_commit_timestamp=$(date -d "$last_commit_date" +%s)
             fifteen_minutes_ago=$(date -d '15 minutes ago' +%s)
-            if [[ $last_commit_timestamp -lt $fifteen_minutes_ago ]]
+            if [[ $last_commit_timestamp -gt $fifteen_minutes_ago ]]
             then
               echo $branch
             fi
