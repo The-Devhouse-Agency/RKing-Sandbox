@@ -18,23 +18,17 @@ jobs:
 
     - name: Run script
       run: |
-        TOKEN="${{ secrets.GITHUB_TOKEN }}"
-        OWNER="${{ github.repository_owner }}"
-        REPO="${{ github.repository }}"
-        branches_json=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/branches)
-        branch_count=$(echo "$branches_json" | jq '. | length')
-        for (( i=0; i<$branch_count; i++ ))
-        do
-          branch=$(echo "$branches_json" | jq -r ".[$i].name")
-          last_commit_date=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/commits/$branch | jq -r '.commit.committer.date')
-          echo "Branch: $branch, Last commit date: $last_commit_date"
-          if [[ $last_commit_date != "null" ]]
-          then
-            last_commit_timestamp=$(date --utc -d "$last_commit_date" +%s)
-            fifteen_minutes_ago=$(date --utc -d '15 minutes ago' +%s)
-            if [[ $last_commit_timestamp -lt $fifteen_minutes_ago ]]
-            then
-              echo "Stale branch: $branch, Last commit more than 15 minutes ago"
-            fi
+        echo "Checking branches..."
+        branches=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                   -s "https://api.github.com/repos/${{ github.repository }}/branches" | jq -r '. | .[] | .name')
+        fifteen_minutes_ago=$(date -u -d'15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+        for branch in $branches; do
+          echo "Checking branch $branch..."
+          last_commit_date=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                             -s "https://api.github.com/repos/${{ github.repository }}/commits/$branch" | jq -r '.commit.author.date')
+          echo "Last commit date: $last_commit_date"
+          echo "Fifteen minutes ago: $fifteen_minutes_ago"
+          if [[ "$last_commit_date" < "$fifteen_minutes_ago" ]]; then
+            echo "Branch $branch is stale"
           fi
         done
