@@ -18,16 +18,12 @@ jobs:
 
     - name: Run script
       run: |
-        echo "Checking branches..."
         branches=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                    -s "https://api.github.com/repos/${{ github.repository }}/branches" | jq -r '. | .[] | .name')
         fifteen_minutes_ago=$(date -u -d'15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
         for branch in $branches; do
-          echo "Checking branch $branch..."
           last_commit_date=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                              -s "https://api.github.com/repos/${{ github.repository }}/commits/$branch" | jq -r '.commit.author.date')
-          echo "Last commit date: $last_commit_date"
-          echo "Fifteen minutes ago: $fifteen_minutes_ago"
           if [[ "$last_commit_date" < "$fifteen_minutes_ago" ]]; then
             echo "Branch $branch is stale"
           fi
