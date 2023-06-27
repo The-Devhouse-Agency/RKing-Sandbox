@@ -21,15 +21,15 @@ jobs:
         TOKEN="${{ secrets.GITHUB_TOKEN }}"
         OWNER="${{ github.repository_owner }}"
         REPO="${{ github.repository }}"
-        branches=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/branches)
+        branches=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/branches | jq -r '.[].name')
         for branch in $branches
         do
-          last_commit_date=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/commits/$branch | jq -r .commit.author.date)
+          last_commit_date=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/commits/$branch | jq -r '.commit.committer.date')
           echo "Branch: $branch, Last commit date: $last_commit_date"
           if [[ $last_commit_date != "null" ]]
           then
-            last_commit_timestamp=$(date -d "$last_commit_date" +%s)
-            fifteen_minutes_ago=$(date -d '15 minutes ago' +%s)
+            last_commit_timestamp=$(date --utc -d "$last_commit_date" +%s)
+            fifteen_minutes_ago=$(date --utc -d '15 minutes ago' +%s)
             if [[ $last_commit_timestamp -lt $fifteen_minutes_ago ]]
             then
               echo "Stale branch: $branch, Last commit more than 15 minutes ago"
