@@ -21,9 +21,11 @@ jobs:
         TOKEN="${{ secrets.GITHUB_TOKEN }}"
         OWNER="${{ github.repository_owner }}"
         REPO="${{ github.repository }}"
-        branches=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/branches | jq -r '.[].name')
-        for branch in $branches
+        branches_json=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/branches)
+        branch_count=$(echo "$branches_json" | jq '. | length')
+        for (( i=0; i<$branch_count; i++ ))
         do
+          branch=$(echo "$branches_json" | jq -r ".[$i].name")
           last_commit_date=$(curl -H "Authorization: token $TOKEN" -s https://api.github.com/repos/$OWNER/$REPO/commits/$branch | jq -r '.commit.committer.date')
           echo "Branch: $branch, Last commit date: $last_commit_date"
           if [[ $last_commit_date != "null" ]]
