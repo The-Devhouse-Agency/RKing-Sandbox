@@ -1,6 +1,7 @@
 name: Archive old branches
 
 on:
+  workflow_dispatch: {}
   schedule:
     # Run job every week
     - cron: '0 0 * * 1-5'
