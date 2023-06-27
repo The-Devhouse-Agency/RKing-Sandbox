@@ -16,7 +16,7 @@ jobs:
         repos=$(curl -H "Accept: application/vnd.github.v3+json" \
                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                https://api.github.com/user/repos)
-        repo_names=$(echo "$repos" | jq -r '.[].full_name')
+        repo_names=$(echo "$repos" | jq -r '.full_name')
         for repo in $repo_names; do
           branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
