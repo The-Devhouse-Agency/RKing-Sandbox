@@ -1,7 +1,6 @@
 name: Archive old branches
 
 on:
-  workflow_dispatch: {}
   schedule:
     # Run job every week
     - cron: '0 0 * * 1-5'
@@ -13,27 +12,27 @@ jobs:
     - name: Archive old branches
       run: |
         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
-        repos=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+        repos=$(curl -H "Accept: application/vnd.github.v3+json" \
                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                https://api.github.com/user/repos)
-        repos=($(echo "$repos" | jq -r '.[].full_name'))
-        for repo in "${repos[@]}"; do
-          branches=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+        repo_names=$(echo "$repos" | grep -o '"full_name":"[^"]*' | cut -d':' -f2 | tr -d '"')
+        for repo in $repo_names; do
+          branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                      https://api.github.com/repos/$repo/branches)
-          branches=($(echo "$branches" | jq -r '.[].name'))
-          for branch in "${branches[@]}"; do
-            branch_info=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+          branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
+          for branch in $branch_names; do
+            branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
                            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                            https://api.github.com/repos/$repo/branches/$branch)
-            last_commit_date=$(echo "$branch_info" | jq -r '.commit.commit.committer.date')
+            last_commit_date=$(echo "$branch_info" | grep -o '"date":"[^"]*' | cut -d':' -f2 | tr -d '"')
             if [[ "$last_commit_date" < "$one_week_ago" ]]; then
               new_branch_name="archive/$branch"
               curl -X POST \
-                   -H "Accept: application/vnd.github.v3+json" \
+                   -H "Accept: application/vnd.github+json" \
                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                   https://api.github.com/repos/$repo/git/refs/heads/$branch \
-                   -d '{"ref": "refs/heads/'"$new_branch_name"'", "sha": "'"$sha"'"}'
+                   https://api.github.com/repos/$repo/branches/$branch/rename \
+                   -d '{"new_name":"'"$new_branch_name"'"}'
             fi
           done
         done
