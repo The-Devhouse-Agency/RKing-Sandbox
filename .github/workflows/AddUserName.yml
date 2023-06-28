@@ -30,23 +30,8 @@ jobs:
     - name: Scan Text in .cs Files using Python script
       run: |
         # Get the list of modified .cs files in the pull request
-        $changedFileNames = git diff --name-only HEAD $(git merge-base HEAD ${{ github.base_ref }}) -- '*.cs'
+        python ${{ env.RENAME_SCRIPT }} ${{github.workspace}} ${{ github.base_ref }}
         
-        function Update-GHAFileHeader {
-            param ( [string]$file )
-            Write-Host "Preparing to run python script `"${{ env.RENAME_SCRIPT }}`" on $file"
-            python ${{ env.RENAME_SCRIPT }} $file
-        }
-        
-        if ($changedFileNames.GetType() -ne [System.Array]) {
-            Update-GHAFileHeader -file $changedFileNames #if not an array, pass it directly
-        } else {
-            # Loop through each modified .cs file and scan its content
-            foreach ($file in $changedFileNames) {
-                Update-GHAFileHeader -file $file
-            }
-        }
-    
     # - name: Read file
     #   id: read
     #   uses: actions/read-file@v2
