@@ -12,7 +12,6 @@ jobs:
     steps:
     - name: Archive old branches
       run: |
-        set -x
         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
         repos=$(curl -H "Accept: application/vnd.github.v3+json" \
                -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
