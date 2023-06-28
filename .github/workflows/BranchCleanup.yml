@@ -1,3 +1,41 @@
+name: Archive old branches
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # Run job every week
+    - cron: '0 0 * * 1-5'
+
+jobs:
+  archive-old-branches:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Archive old branches
+      run: |
+        set -x
+        one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
+        repo="${GITHUB_REPOSITORY}"
+        branches=$(curl -H "Accept: application/vnd.github.v3+json" \
+                     -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+                     https://api.github.com/repos/$repo/branches)
+        branch_names=$(echo "$branches" | jq -r '.[].name')
+        for branch in $branch_names; do
+          branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
+                           -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+                           https://api.github.com/repos/$repo/branches/$branch)
+          last_commit_date=$(echo "$branch_info" | jq -r '.commit.commit.author.date')
+          echo branch to check: $branch
+          if [[ "$branch" == "art/BCTest" ]]; then
+            new_branch_name="archive/$branch"
+            echo $branch renamed to: $new_branch_name
+            curl -X POST \
+                 -H "Accept: application/vnd.github+json" \
+                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+                 https://api.github.com/repos/$repo/branches/$branch/rename \
+                 -d '{"new_name":"'"$new_branch_name"'"}'
+          fi
+        done
+
 # name: Archive old branches
 
 # on:
@@ -36,46 +74,46 @@
 #           fi
 #         done
 
-name: Archive old branches
+# name: Archive old branches
 
-on:
-  workflow_dispatch: {}
-  schedule:
-    # Run job every week
-    - cron: '0 0 * * 1-5'
+# on:
+#   workflow_dispatch: {}
+#   schedule:
+#     # Run job every week
+#     - cron: '0 0 * * 1-5'
 
-jobs:
-  archive-old-branches:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Archive old branches
-      run: |
-        one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
-        repos=$(curl -H "Accept: application/vnd.github.v3+json" \
-               -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-               https://api.github.com/user/repos)
-        repo_names=$(echo "$repos" | jq -r '.full_name')
-        for repo in $repo_names; do
-          branches=$(curl -H "Accept: application/vnd.github.v3+json" \
-                     -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-                     https://api.github.com/repos/$repo/branches)
-          branch_names=$(echo "$branches" | jq -r '.[].name')
-          for branch in $branch_names; do
-            branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
-                           -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-                           https://api.github.com/repos/$repo/branches/$branch)
-            last_commit_date=$(echo "$branch_info" | jq -r '.commit.commit.committer.date')
-            #if [[ "$last_commit_date" < "$one_week_ago" ]]; then
-            if [[ $branch == "art/BCTest" ]]; then
-              new_branch_name="archive/$branch"
-              curl -X POST \
-                   -H "Accept: application/vnd.github+json" \
-                   -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-                   https://api.github.com/repos/$repo/branches/$branch/rename \
-                   -d '{"new_name":"'"$new_branch_name"'"}'
-            fi
-          done
-        done
+# jobs:
+#   archive-old-branches:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Archive old branches
+#       run: |
+#         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
+#         repos=$(curl -H "Accept: application/vnd.github.v3+json" \
+#                -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                https://api.github.com/user/repos)
+#         repo_names=$(echo "$repos" | jq -r '.full_name')
+#         for repo in $repo_names; do
+#           branches=$(curl -H "Accept: application/vnd.github.v3+json" \
+#                      -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                      https://api.github.com/repos/$repo/branches)
+#           branch_names=$(echo "$branches" | jq -r '.[].name')
+#           for branch in $branch_names; do
+#             branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
+#                            -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                            https://api.github.com/repos/$repo/branches/$branch)
+#             last_commit_date=$(echo "$branch_info" | jq -r '.commit.commit.committer.date')
+#             #if [[ "$last_commit_date" < "$one_week_ago" ]]; then
+#             if [[ $branch == "art/BCTest" ]]; then
+#               new_branch_name="archive/$branch"
+#               curl -X POST \
+#                    -H "Accept: application/vnd.github+json" \
+#                    -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                    https://api.github.com/repos/$repo/branches/$branch/rename \
+#                    -d '{"new_name":"'"$new_branch_name"'"}'
+#             fi
+#           done
+#         done
 
 
 # name: Branch Cleanup
