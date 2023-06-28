@@ -27,9 +27,10 @@ jobs:
                            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                            https://api.github.com/repos/$repo/branches/$branch)
             last_commit_date=$(echo "$branch_info" | grep -o '"date":"[^"]*' | cut -d':' -f2 | tr -d '"')
+            echo branch to check: $branch
             if [[ $branch == "art/BCTest" ]]; then    #            if [[ "$last_commit_date" < "$one_week_ago" ]]; then
               new_branch_name="archive/$branch"
-              echo $new_branch_name
+              echo $branch renamed to: $new_branch_name
               curl -X POST \
                    -H "Accept: application/vnd.github+json" \
                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
