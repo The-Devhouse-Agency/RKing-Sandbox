@@ -12,12 +12,12 @@ jobs:
     steps:
     - name: Archive old branches
       run: |
-        set -x
         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
         repo="${GITHUB_REPOSITORY}"
         branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                      -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
                      https://api.github.com/repos/$repo/branches)
+        set -x
         branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
         for branch in $branch_names; do
           branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
