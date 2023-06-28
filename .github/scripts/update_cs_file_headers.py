@@ -68,35 +68,37 @@ for file_diff in diff_index:
     #grab the file (on this branch)
     with open(file_path, 'wt') as file:
         lines = file.readlines()
-    
-    # search for pre-existing "Created By" lines
-    for i, line in enumerate(lines):
-        if line.lower().strip().startswith(created_by_header.lower()): 
-            created_by_line_num = i
-            break
-    
-    # search for pre-existing "Edited By" lines
-    for i, line in enumerate(lines):
-        if line.lower().strip().startswith(edited_by_header.lower()): 
-            edited_by_line_num = i
-            break
-            
-    # different logic cases based on what was (or wasn't) found
-    if created_by_line_num >= 0:
-        if can_overwrite_header_line(line, created_by_header):
-            lines[created_by_line_num] = get_indentation_whitespace(line) + final_created_by_str
-    else:
-        #insert before first line (making this the new first line)
-        lines.insert(0, final_created_by_str) 
-    
-    if edited_by_line_num >= 0:
-        if can_overwrite_header_line(line, edited_by_header):
-            lines[edited_by_line_num] = get_indentation_whitespace(line) + final_edited_by_str
-    else:
-        #insert before second line (making this the new second line)
-        lines.insert(1, final_edited_by_str) 
-    
-    
+        
+        # search for pre-existing "Created By" lines
+        for i, line in enumerate(lines):
+            if line.lower().strip().startswith(created_by_header.lower()): 
+                created_by_line_num = i
+                break
+        
+        # search for pre-existing "Edited By" lines
+        for i, line in enumerate(lines):
+            if line.lower().strip().startswith(edited_by_header.lower()): 
+                edited_by_line_num = i
+                break
+                
+        # Update Lines
+
+        # different logic cases based on what was (or wasn't) found
+        if created_by_line_num >= 0:
+            if can_overwrite_header_line(line, created_by_header):
+                lines[created_by_line_num] = get_indentation_whitespace(line) + final_created_by_str
+        else:
+            #insert before first line (making this the new first line)
+            lines.insert(0, final_created_by_str) 
+        
+        if edited_by_line_num >= 0:
+            if can_overwrite_header_line(line, edited_by_header):
+                lines[edited_by_line_num] = get_indentation_whitespace(line) + final_edited_by_str
+        else:
+            #insert before second line (making this the new second line)
+            lines.insert(1, final_edited_by_str) 
+        
+        file.writelines(lines)
     
     #TODO: Write cases that add in new lines
 
