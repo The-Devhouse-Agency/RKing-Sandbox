@@ -15,12 +15,11 @@ args_list = sys.argv[1:] #element 0 is the script name; we only want the argumen
 
 repo_path = args_list[0]
 main_branch_name = args_list[1]
+created_by_header = args_list[2] #"//Created By:"
+edited_by_header = args_list[3] #"//Edited By:"
 
 repo = git.Repo(repo_path)
 diff_index: git.diff.DiffIndex = repo.head.commit.diff(repo.branches[main_branch_name].commit)
-
-created_by_header = "//Created By:"
-edited_by_header = "//Edited By:"
 
 ################# Module Funcs #################
 
@@ -37,11 +36,12 @@ def get_indentation_whitespace(line: str) -> str:
 
 #for each file affected by this branch
 for file_diff in diff_index:
+
+    ################# Validation #################
+
     #for each file, see if we can find the file's own entire history instead of just a branch diff
     file_path:str = file_diff.a_path
     change_type = file_diff.change_type
-    
-    ################# Validation #################
 
     if not file_path.endswith(".cs"): continue # we only care about c# scripts
     if change_type == "D": continue # we don't care about deleted files
@@ -61,11 +61,10 @@ for file_diff in diff_index:
     final_created_by_str = created_by_header + " " + sorted_commit_authors[1]
     final_edited_by_str = edited_by_header + " " + (", ".join(sorted_commit_authors[1:]))
     
-    lines = None
     created_by_line_num = -1
     edited_by_line_num = -1
     
-    #grab the file (on this branch)
+    #grab the file (on this branch) and update it
     with open(file_path, 'wt') as file:
         lines = file.readlines()
         

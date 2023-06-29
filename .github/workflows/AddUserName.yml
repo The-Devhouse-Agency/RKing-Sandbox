@@ -11,6 +11,8 @@ jobs:
     
     env:
       RENAME_SCRIPT: ../scripts/update_cs_file_headers.py
+      CREATED_BY_HEADER: "//Created By:"
+      EDITED_BY_HEADER: "//Edited By:"
 
     steps:
     - name: Checkout Repository
@@ -30,7 +32,7 @@ jobs:
     - name: Scan Text in .cs Files using Python script
       run: |
         # Get the list of modified .cs files in the pull request
-        python ${{ env.RENAME_SCRIPT }} ${{github.workspace}} ${{ github.base_ref }}
+        python ${{ env.RENAME_SCRIPT }} ${{github.workspace}} ${{ github.base_ref }} "${{env.CREATED_BY_HEADER}}" "${{env.EDITED_BY_HEADER}}"
         
     # - name: Read file
     #   id: read
