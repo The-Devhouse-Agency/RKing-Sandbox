@@ -18,7 +18,9 @@ jobs:
         branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                  -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
                  https://api.github.com/repos/$repo/branches)
+        echo BrAnChEs: $branches
         branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
+        echo BrAnCh nameS $branch_names
         stale_branch_found=false
         for branch in $branch_names; do
           echo Branch name to check is $branch
