@@ -13,7 +13,7 @@ jobs:
     - name: Archive old branches
       run: |
         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
-        repo="The-Devhouse-Agency/RKing-Sandbox"
+        repo="${GITHUB_REPOSITORY}"
         branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                  -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
                  https://api.github.com/repos/$repo/branches)
