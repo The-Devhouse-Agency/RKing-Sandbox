@@ -14,7 +14,6 @@ jobs:
       run: |
         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
         repo="${GITHUB_REPOSITORY}"
-        echo "Repo name is q " $repo
         echo Repo name is $repo
         branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                  -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
@@ -22,7 +21,7 @@ jobs:
         branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
         stale_branch_found=false
         for branch in $branch_names; do
-          echo Branch name: $branch
+          echo Branch name to check is $branch
           if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == "dev" || "$branch" == "development" || "$branch" == "dev-iteration" ]]; then
             continue
           fi
