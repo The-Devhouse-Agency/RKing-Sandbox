@@ -13,102 +13,29 @@ jobs:
     - name: Archive old branches
       run: |
         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
-        repos=$(curl -H "Accept: application/vnd.github.v3+json" \
-               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-               https://api.github.com/user/repos)
-        repo_names=$(echo "$repos" | grep -o '"full_name":"[^"]*' | cut -d':' -f2 | tr -d '"')
-        for repo in $repo_names; do
-          branches=$(curl -H "Accept: application/vnd.github.v3+json" \
-                     -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                     https://api.github.com/repos/$repo/branches)
-          branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
-          for branch in $branch_names; do
-            branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
-                           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                           https://api.github.com/repos/$repo/branches/$branch)
-            last_commit_date=$(echo "$branch_info" | grep -o '"date":"[^"]*' | cut -d':' -f2 | tr -d '"')
-            echo branch to check: $branch
-            if [[ $branch == "art/BCTest" ]]; then    #            if [[ "$last_commit_date" < "$one_week_ago" ]]; then
-              new_branch_name="archive/$branch"
-              echo $branch renamed to: $new_branch_name
-              curl -X POST \
-                   -H "Accept: application/vnd.github+json" \
-                   -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                   https://api.github.com/repos/$repo/branches/$branch/rename \
-                   -d '{"new_name":"'"$new_branch_name"'"}'
-            fi
-          done
+        repo="${GITHUB_REPOSITORY}"
+        branches=$(curl -H "Accept: application/vnd.github.v3+json" \
+                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+                 https://api.github.com/repos/$repo/branches)
+        branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
+        for branch in $branch_names; do
+          if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == "dev" || "$branch" == "development" || "$branch" == "dev-iteration" ]]; then
+            continue
+          fi
+          branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
+                         -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+                         https://api.github.com/repos/$repo/branches/$branch)
+          last_commit_date=$(echo "$branch_info" | grep -o '"commit":{"sha":"[^"]*' | cut -d':' -f4 | cut -d',' -f1 | tr -d '"')
+          if [[ "$last_commit_date" < "$one_week_ago" ]]; then
+            new_branch_name="archive/$branch"
+            echo $branch renamed to: $new_branch_name
+            curl -X POST \
+                 -H "Accept: application/vnd.github+json" \
+                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+                 https://api.github.com/repos/$repo/branches/$branch/rename \
+                 -d '{"new_name":"'"$new_branch_name"'"}'
+          fi
         done
-
-# name: Archive old branches
-
-# on:
-#   workflow_dispatch: {}
-#   schedule:
-#     # Run job every week
-#     - cron: '0 0 * * 1-5'
-
-# jobs:
-#   archive-old-branches:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Archive old branches
-#       run: |
-#         one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
-#         repos=$(curl -H "Accept: application/vnd.github.v3+json" \
-#                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-#                https://api.github.com/user/repos)
-#         repo_names=$(echo "$repos" | jq -r '.full_name')
-#         for repo in $repo_names; do
-#           branches=$(curl -H "Accept: application/vnd.github.v3+json" \
-#                      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-#                      https://api.github.com/repos/$repo/branches)
-#           branch_names=$(echo "$branches" | jq -r '.[].name')
-#           for branch in $branch_names; do
-#             branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
-#                            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-#                            https://api.github.com/repos/$repo/branches/$branch)
-#             last_commit_date=$(echo "$branch_info" | jq -r '.commit.commit.committer.date')
-#             #if [[ "$last_commit_date" < "$one_week_ago" ]]; then
-#             if [[ $branch == "art/BCTest" ]]; then
-#               new_branch_name="archive/$branch"
-#               curl -X POST \
-#                    -H "Accept: application/vnd.github+json" \
-#                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-#                    https://api.github.com/repos/$repo/branches/$branch/rename \
-#                    -d '{"new_name":"'"$new_branch_name"'"}'
-#             fi
-#           done
-#         done
-
-
-# name: Branch Cleanup
-
-# on:
-#   workflow_dispatch: {}
-# #  schedule:
-# #    - cron:  '0 0 * * 0'  # This means every Sunday at 00:00
-
-# jobs:
-#   branch-cleanup:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Check out code
-#       uses: actions/checkout@v3
-
-#     - name: Install jq
-#       run: sudo apt-get install -y jq
-
-#     - name: Run script
-#       run: |
-#         branches=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-#                    -s "https://api.github.com/repos/${{ github.repository }}/branches" | jq -r '. | .[] | .name')
-#         fifteen_minutes_ago=$(date -u -d'15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
-#         for branch in $branches; do
-#           last_commit_date=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-#                              -s "https://api.github.com/repos/${{ github.repository }}/commits/$branch" | jq -r '.commit.author.date')
-#           if [[ "$last_commit_date" < "$fifteen_minutes_ago" ]]; then
-#             echo "Branch $branch is stale"
-#           fi
-#         done
+        if ! $stale_branch_found; then
+          echo "No stale branches to archive"
+        fi
