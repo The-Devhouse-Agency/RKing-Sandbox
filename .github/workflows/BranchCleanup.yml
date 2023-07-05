@@ -2,8 +2,8 @@ name: Check Stale Branches
 
 on:
   workflow_dispatch:
-#   schedule:
-#     - cron:  '0 0 * * 1-5'
+  schedule:
+    - cron:  '0 0 * * 1-5'
 
 jobs:
   stale_branches:
@@ -11,21 +11,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
-          
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests python-dateutil
-          
       - name: Run Python script
         env:
           GITHUB_TOKEN: ${{ secrets.rking1189_PAT }}
-        run: |
+        run: python3 -c "$(cat << 'EOF'
           import os
           import requests
           import json
@@ -79,6 +76,9 @@ jobs:
 
           else:
               print(f"Failed to fetch branches: {response.status_code}")
+EOF
+)"
+
 
 # name: Archive old branches
 
