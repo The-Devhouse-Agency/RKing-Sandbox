@@ -1,0 +1,25 @@
+name: Archive Branches
+
+on:
+  workflow_dispatch: {}
+#  schedule:
+#    - cron:  '0 0 * * 1-5'
+
+jobs:
+  archive_branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-dateutil
+      - name: Run Python script
+        env:
+          GITHUB_TOKEN: ${{ secrets.rking1189_PAT }}
+        run: python3 stale_branches.py

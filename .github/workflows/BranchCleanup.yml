@@ -2,27 +2,35 @@ name: Archive old branches
 
 on:
   workflow_dispatch: {}
-  schedule:
-    # Run job every week
-    - cron: '0 0 * * 1-5'
+#   schedule:
+#     - cron: '0 0 * * 1-5'
 
 jobs:
   archive-old-branches:
     runs-on: ubuntu-latest
     steps:
+    
+    - name: Set Up Python (If Necessary)
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    
+    - name: Set Up Python Libraries
+      run: |
+        
+      
     - name: Archive old branches
       run: |
-        one_week_ago=$(date -d '1 week ago' -u +'%Y-%m-%dT%H:%M:%SZ')
+        one_week_ago=$(date -d '1 day ago' -u +'%Y-%m-%dT%H:%M:%SZ')
         repo="${GITHUB_REPOSITORY}"
         echo Repo name is $repo
         branches=$(curl -H "Accept: application/vnd.github.v3+json" \
                  -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
                  https://api.github.com/repos/$repo/branches)
         echo BrAnChEs: $branches
-        branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
-        echo BrAnCh nameS $branch_names
+        #branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
         stale_branch_found=false
-        for branch in $branch_names; do
+        for branch in $branches; do
           echo Branch name to check is $branch
           if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == "dev" || "$branch" == "development" || "$branch" == "dev-iteration" ]]; then
             continue
@@ -35,13 +43,13 @@ jobs:
             stale_branch_found=true
             new_branch_name="archive/$branch"
             echo $branch renamed to: $new_branch_name
-            curl -X POST \
-                 -H "Accept: application/vnd.github.v3+json" \
-                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-                 https://api.github.com/repos/$repo/branches/$branch/rename \
-                 -d '{"new_name":"'"$new_branch_name"'"}'
           fi
         done
         if ! $stale_branch_found; then
           echo "No stale branches to archive"
         fi
+#            curl -X POST \
+#                 -H "Accept: application/vnd.github.v3+json" \
+#                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                 https://api.github.com/repos/$repo/branches/$branch/rename \
+#                 -d '{"new_name":"'"$new_branch_name"'"}'
