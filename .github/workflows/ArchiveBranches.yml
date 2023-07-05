@@ -22,4 +22,4 @@ jobs:
       - name: Run Python script
         env:
           GITHUB_TOKEN: ${{ secrets.rking1189_PAT }}
-        run: python3 stale_branches.py
+        run: .github/workflows/stale_branches.py
