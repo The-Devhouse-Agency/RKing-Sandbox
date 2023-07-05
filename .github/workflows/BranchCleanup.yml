@@ -1,46 +1,138 @@
-name: Archive old branches
+name: Check Stale Branches
 
 on:
-  workflow_dispatch: {}
-  schedule:
-    # Run job every week
-    - cron: '0 0 * * 1-5'
+  workflow_dispatch:
+#   schedule:
+#     - cron:  '0 0 * * 1-5'
 
 jobs:
-  archive-old-branches:
+  stale_branches:
     runs-on: ubuntu-latest
     steps:
-    - name: Archive old branches
-      run: |
-        one_week_ago=$(date -d '1 day ago' -u +'%Y-%m-%dT%H:%M:%SZ')
-        repo="${GITHUB_REPOSITORY}"
-        echo Repo name is $repo
-        branches=$(curl -H "Accept: application/vnd.github.v3+json" \
-                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-                 https://api.github.com/repos/$repo/branches)
-        echo BrAnChEs: $branches
-        #branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
-        stale_branch_found=false
-        for branch in $branches; do
-          echo Branch name to check is $branch
-          if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == "dev" || "$branch" == "development" || "$branch" == "dev-iteration" ]]; then
-            continue
-          fi
-          branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
-                         -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-                         https://api.github.com/repos/$repo/branches/$branch)
-          last_commit_date=$(echo "$branch_info" | grep -o '"commit":{"sha":"[^"]*' | cut -d':' -f4 | cut -d',' -f1 | tr -d '"')
-          if [[ "$last_commit_date" < "$one_week_ago" ]]; then
-            stale_branch_found=true
-            new_branch_name="archive/$branch"
-            echo $branch renamed to: $new_branch_name
-          fi
-        done
-        if ! $stale_branch_found; then
-          echo "No stale branches to archive"
-        fi
-#            curl -X POST \
-#                 -H "Accept: application/vnd.github.v3+json" \
-#                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
-#                 https://api.github.com/repos/$repo/branches/$branch/rename \
-#                 -d '{"new_name":"'"$new_branch_name"'"}'
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+          
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-dateutil
+          
+      - name: Run Python script
+        env:
+          GITHUB_TOKEN: ${{ secrets.rking1189_PAT }}
+        run: |
+          import os
+          import requests
+          import json
+          from dateutil.parser import parse as date_parser
+          from datetime import datetime, timedelta
+
+          # Set the repo name and token
+          repo = os.getenv("GITHUB_REPOSITORY")
+          token = os.getenv("GITHUB_TOKEN")
+
+          # Set the header for GitHub API requests
+          headers = {
+              "Accept": "application/vnd.github.v3+json",
+              "Authorization": f"Bearer {token}"
+          }
+
+          # Get the date for one week ago
+          one_week_ago = (datetime.utcnow() - timedelta(days=7)).isoformat() + "Z"
+
+          # Get all the branches
+          response = requests.get(f"https://api.github.com/repos/{repo}/branches", headers=headers)
+
+          # Check if the response is successful
+          if response.status_code == 200:
+              branches = response.json()
+
+              stale_branch_found = False
+
+              # Iterate over the branches
+              for branch in branches:
+                  branch_name = branch['name']
+
+                  # Skip these branches
+                  if branch_name in ["main", "master", "dev", "development", "dev-iteration"]:
+                      continue
+
+                  # Get the branch info
+                  branch_info = requests.get(f"https://api.github.com/repos/{repo}/branches/{branch_name}", headers=headers).json()
+
+                  # Get the date of the last commit
+                  last_commit_date = branch_info['commit']['commit']['committer']['date']
+
+                  # Check if the last commit is older than one week
+                  if date_parser(last_commit_date) < date_parser(one_week_ago):
+                      stale_branch_found = True
+                      new_branch_name = "archive/" + branch_name
+                      print(branch_name + " renamed to: " + new_branch_name)
+
+              if not stale_branch_found:
+                  print("No stale branches to archive")
+
+          else:
+              print(f"Failed to fetch branches: {response.status_code}")
+
+# name: Archive old branches
+
+# on:
+#   workflow_dispatch: {}
+#   schedule:
+#     # Run job every week
+#     - cron: '0 0 * * 1-5'
+
+# jobs:
+#   archive-old-branches:
+#     runs-on: ubuntu-latest
+#     steps:
+    
+#     - name: Set Up Python (If Necessary)
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: 3.11
+    
+#     - name: Set Up Python Libraries
+#       run: |
+        
+      
+#     - name: Archive old branches
+#       run: |
+#         one_week_ago=$(date -d '1 day ago' -u +'%Y-%m-%dT%H:%M:%SZ')
+#         repo="${GITHUB_REPOSITORY}"
+#         echo Repo name is $repo
+#         branches=$(curl -H "Accept: application/vnd.github.v3+json" \
+#                  -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                  https://api.github.com/repos/$repo/branches)
+#         echo BrAnChEs: $branches
+#         #branch_names=$(echo "$branches" | grep -o '"name":"[^"]*' | cut -d':' -f2 | tr -d '"')
+#         stale_branch_found=false
+#         for branch in $branches; do
+#           echo Branch name to check is $branch
+#           if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == "dev" || "$branch" == "development" || "$branch" == "dev-iteration" ]]; then
+#             continue
+#           fi
+#           branch_info=$(curl -H "Accept: application/vnd.github.v3+json" \
+#                          -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+#                          https://api.github.com/repos/$repo/branches/$branch)
+#           last_commit_date=$(echo "$branch_info" | grep -o '"commit":{"sha":"[^"]*' | cut -d':' -f4 | cut -d',' -f1 | tr -d '"')
+#           if [[ "$last_commit_date" < "$one_week_ago" ]]; then
+#             stale_branch_found=true
+#             new_branch_name="archive/$branch"
+#             echo $branch renamed to: $new_branch_name
+#           fi
+#         done
+#         if ! $stale_branch_found; then
+#           echo "No stale branches to archive"
+#         fi
+# #            curl -X POST \
+# #                 -H "Accept: application/vnd.github.v3+json" \
+# #                 -H "Authorization: Bearer ${{ secrets.rking1189_PAT }}" \
+# #                 https://api.github.com/repos/$repo/branches/$branch/rename \
+# #                 -d '{"new_name":"'"$new_branch_name"'"}'
