@@ -73,7 +73,7 @@ jobs:
 
           else:
               print(f"Failed to fetch branches: {response.status_code}")
-EOF)"
+          EOF)"
 
 
 # name: Archive old branches
