@@ -40,6 +40,8 @@ if response.status_code == 200:
         if date_parser(last_commit_date) < date_parser(one_week_ago):
             stale_branch_found = True
             new_branch_name = "archive/" + branch_name
+            rename_payload = {"new_name": new_branch_name}
+            rename_response = requests.post(f"https://api.github.com/repos/{repo}/branches/{branch_name}/rename", headers=headers, json=rename_payload)
             print(branch_name + " renamed to: " + new_branch_name)
 
     if not stale_branch_found:
