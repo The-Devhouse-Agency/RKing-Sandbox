@@ -40,7 +40,7 @@ for file_diff in diff_index:
     ################# Validation #################
 
     #for each file, see if we can find the file's own entire history instead of just a branch diff
-    file_path:str = file_diff.a_path
+    file_path:str = file_diff.a_path # a as in a/b comparison
     change_type = file_diff.change_type
 
     if not file_path.endswith(".cs"): continue # we only care about c# scripts
@@ -50,16 +50,16 @@ for file_diff in diff_index:
     if change_type == "A":
         print("file was added; we can set Created By: and Edited By: fields")
     elif change_type == "M":
-        print("file was modified; we can set Edited By: fields") #we have no way to confirm who the original creator of the file is. 
+        print("file was modified; we can set Edited By: fields") #!we have no way to confirm who the original creator of the file is. 
     
     ################# Actual Logic #################
-
+    
     # oldest-first list of unique commit author names
     # (converting it to a set first easily filters out duplicates)
     sorted_commit_authors: list = list(set(commit.author.name for commit in repo.iter_commits(paths=file_path))).reverse()
     
-    final_created_by_str = created_by_header + " " + sorted_commit_authors[1]
-    final_edited_by_str = edited_by_header + " " + (", ".join(sorted_commit_authors[1:]))
+    combined_created_by_str = created_by_header + " " + sorted_commit_authors[0]
+    combined_edited_by_str = edited_by_header + " " + (", ".join(sorted_commit_authors[1:]))
     
     created_by_line_num = -1
     edited_by_line_num = -1
@@ -85,17 +85,17 @@ for file_diff in diff_index:
         # different logic cases based on what was (or wasn't) found
         if created_by_line_num >= 0:
             if can_overwrite_header_line(line, created_by_header):
-                lines[created_by_line_num] = get_indentation_whitespace(line) + final_created_by_str
+                lines[created_by_line_num] = get_indentation_whitespace(line) + combined_created_by_str
         else:
             #insert before first line (making this the new first line)
-            lines.insert(0, final_created_by_str) 
+            lines.insert(0, combined_created_by_str) 
         
         if edited_by_line_num >= 0:
             if can_overwrite_header_line(line, edited_by_header):
-                lines[edited_by_line_num] = get_indentation_whitespace(line) + final_edited_by_str
+                lines[edited_by_line_num] = get_indentation_whitespace(line) + combined_edited_by_str
         else:
             #insert before second line (making this the new second line)
-            lines.insert(1, final_edited_by_str) 
+            lines.insert(1, combined_edited_by_str) 
         
         file.writelines(lines)
     
