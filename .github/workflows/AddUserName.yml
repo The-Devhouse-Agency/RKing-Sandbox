@@ -2,8 +2,8 @@ name: Add user name
 
 on:
   workflow_dispatch: {}
-#   pull_request:
-#     types: [opened]
+  pull_request:
+    types: [opened]
 
 jobs:
   add-user-name:
@@ -11,9 +11,11 @@ jobs:
     
     env:
       RENAME_SCRIPT: ../scripts/update_cs_file_headers.py
+      PR_BRANCH_NAME: ${{github.event.pull_request.head.ref}}
+      TARGET_BRANCH_NAME: ${{github.event.pull_request.base.ref}}
       CREATED_BY_HEADER: "//Created By:"
       EDITED_BY_HEADER: "//Edited By:"
-
+    
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -32,7 +34,9 @@ jobs:
     - name: Scan Text in .cs Files using Python script
       run: |
         # Get the list of modified .cs files in the pull request
-        python ${{ env.RENAME_SCRIPT }} ${{github.workspace}} ${{ github.base_ref }} "${{env.CREATED_BY_HEADER}}" "${{env.EDITED_BY_HEADER}}"
+        echo "PR branch: ${{env.PR_BRANCH_NAME}}"
+        echo "Target branch: ${{env.TARGET_BRANCH_NAME}}"
+        python ${{ env.RENAME_SCRIPT }} ${{github.workspace}} ${{env.PR_BRANCH_NAME}} ${{env.TARGET_BRANCH_NAME}} "${{env.CREATED_BY_HEADER}}" "${{env.EDITED_BY_HEADER}}"
         
     # - name: Read file
     #   id: read

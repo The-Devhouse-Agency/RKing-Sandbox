@@ -14,29 +14,35 @@ from github import Github
 args_list = sys.argv[1:] #element 0 is the script name; we only want the arguments
 
 repo_path = args_list[0]
-main_branch_name = args_list[1]
-created_by_header = args_list[2] #"//Created By:"
-edited_by_header = args_list[3] #"//Edited By:"
+pr_branch_name = args_list[1]
+target_branch_name = args_list[2] #source of truth that we compare the PR against
+created_by_header = args_list[3] #"//Created By:"
+edited_by_header = args_list[4] #"//Edited By:"
 
 repo = git.Repo(repo_path)
-diff_index: git.diff.DiffIndex = repo.head.commit.diff(repo.branches[main_branch_name].commit)
+pr_commit: git.Commit = repo.branches[pr_branch_name].commit
+target_commit: git.Commit = repo.branches[target_branch_name].commit
+
+diff_index: git.diff.DiffIndex = pr_commit.diff(target_commit) # remember, b.diff(a)
+
 
 ################# Module Funcs #################
 
 # Double strip in case the slicing exposes internal whitespace to the edge of the string
-def can_overwrite_header_line(line_num, line_str, header) -> bool:
+def can_overwrite_header_line(line_str, header) -> bool:
     return len(line_str.strip()[len(header):].strip()) <= 0
 
 # get the first x characters where x is the size of the stripped leading whitespace
-def get_indentation_whitespace(line: str) -> str:
-    line_minus_leading_whitespace = line.lstrip()
-    return line[:len(line) - len(line_minus_leading_whitespace)]
+def get_indentation_whitespace(line_str: str) -> str:
+    line_minus_leading_whitespace = line_str.lstrip()
+    return line_str[:len(line_str) - len(line_minus_leading_whitespace)]
 
 ################# Main Execution #################
 
 #for each file affected by this branch
-for file_diff in diff_index:
-
+for val in diff_index:
+    file_diff: git.Diff = val
+    
     ################# Validation #################
 
     #for each file, see if we can find the file's own entire history instead of just a branch diff
@@ -61,6 +67,7 @@ for file_diff in diff_index:
     combined_created_by_str = created_by_header + " " + sorted_commit_authors[0]
     combined_edited_by_str = edited_by_header + " " + (", ".join(sorted_commit_authors[1:]))
     
+    # init with invalid marker for easy checking
     created_by_line_num = -1
     edited_by_line_num = -1
     
@@ -72,34 +79,39 @@ for file_diff in diff_index:
         for i, line in enumerate(lines):
             if line.lower().strip().startswith(created_by_header.lower()): 
                 created_by_line_num = i
+                created_by_line_src_text = line
                 break
         
         # search for pre-existing "Edited By" lines
         for i, line in enumerate(lines):
             if line.lower().strip().startswith(edited_by_header.lower()): 
                 edited_by_line_num = i
+                edited_by_line_src_text = line
                 break
                 
         # Update Lines
-
+        
         # different logic cases based on what was (or wasn't) found
         if created_by_line_num >= 0:
-            if can_overwrite_header_line(line, created_by_header):
-                lines[created_by_line_num] = get_indentation_whitespace(line) + combined_created_by_str
+            line_str = created_by_line_src_text
+
+            if can_overwrite_header_line(line_str, created_by_header):
+                lines[created_by_line_num] = get_indentation_whitespace(line_str) + combined_created_by_str
         else:
             #insert before first line (making this the new first line)
             lines.insert(0, combined_created_by_str) 
         
         if edited_by_line_num >= 0:
-            if can_overwrite_header_line(line, edited_by_header):
-                lines[edited_by_line_num] = get_indentation_whitespace(line) + combined_edited_by_str
+            line_str = edited_by_line_src_text
+            
+            if can_overwrite_header_line(line_str, edited_by_header):
+                lines[edited_by_line_num] = get_indentation_whitespace(line_str) + combined_edited_by_str
         else:
             #insert before second line (making this the new second line)
             lines.insert(1, combined_edited_by_str) 
         
         file.writelines(lines)
     
-    #TODO: Write cases that add in new lines
 
         
     
