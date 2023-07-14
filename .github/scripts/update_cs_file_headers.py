@@ -25,7 +25,6 @@ target_commit: git.Commit = repo.branches[target_branch_name].commit
 
 diff_index: git.diff.DiffIndex = pr_commit.diff(target_commit) # remember, b.diff(a)
 
-
 ################# Module Funcs #################
 
 # Double strip in case the slicing exposes internal whitespace to the edge of the string
@@ -46,7 +45,10 @@ for val in diff_index:
     ################# Validation #################
 
     #for each file, see if we can find the file's own entire history instead of just a branch diff
-    file_path:str = file_diff.a_path # a as in a/b comparison
+    
+    # Using b (the path on PR branch) bc we're checked out on that branch, which should ensure 
+    # it's a valid path. If the file was moved between a and b, the paths will of course differ.
+    file_path:str = file_diff.b_path 
     change_type = file_diff.change_type
 
     if not file_path.endswith(".cs"): continue # we only care about c# scripts
@@ -64,15 +66,18 @@ for val in diff_index:
     # (converting it to a set first easily filters out duplicates)
     sorted_commit_authors: list = list(set(commit.author.name for commit in repo.iter_commits(paths=file_path))).reverse()
     
-    combined_created_by_str = created_by_header + " " + sorted_commit_authors[0]
-    combined_edited_by_str = edited_by_header + " " + (", ".join(sorted_commit_authors[1:]))
+    combined_created_by_str = created_by_header + " " + sorted_commit_authors[0]+ "\n"
+    combined_edited_by_str = edited_by_header + " " + (", ".join(sorted_commit_authors[1:]))+ "\n"
     
     # init with invalid marker for easy checking
     created_by_line_num = -1
     edited_by_line_num = -1
+
+    created_by_line_src_text = None
+    edited_by_line_src_text = None
     
     #grab the file (on this branch) and update it
-    with open(file_path, 'wt') as file:
+    with open(file_path, 'r+') as file:
         lines = file.readlines()
         
         # search for pre-existing "Created By" lines
